@@ -1,20 +1,25 @@
 const express = require("express");
 const cors = require("cors");
+const connectDB = require('./config/db');
 require("dotenv").config();
-const connectDB = require("./config/db"); // 1. Import the connection function (adjust path if it's in a folder)
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 2. Call the connection
-connectDB(); 
+const shoe_routes = require('./routes/shoes')
 
+connectDB();
+ 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
-app.get("/", (req, res) => res.send("API is running..."));
+app.get('/', (req, res) => res.send("API is running...")); // test route
+
+app.use('/api/shoes',shoe_routes)
+
+app.get('/')
 
 // Start server
 app.listen(PORT, () => {
