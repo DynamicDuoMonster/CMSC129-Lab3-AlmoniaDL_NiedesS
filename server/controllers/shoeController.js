@@ -1,6 +1,10 @@
 const Shoe = require('../models/shoeModel')
 const mongoose = require('mongoose')
 
+//shoe Image
+const multer = require('multer');
+
+
 // get all shoes
 const getShoes = async (req, res) => {
     const shoes = await Shoe.find({}).sort({createdAt: -1})
@@ -26,15 +30,14 @@ const getShoe = async (req, res) => {
 
 // create new shoe
 const addShoe = async (req, res) => {
-    const {shoe_name, color, price} = req.body
+    const { shoe_name, brand, color, price } = req.body
+    const imageUrl = req.file ? `/uploads/shoes/${req.file.filename}` : null  // ← get image from multer
 
-
-    // add doc to db
-    try{
-        const shoe = await Shoe.create({shoe_name, color, price})
+    try {
+        const shoe = await Shoe.create({ shoe_name, brand, color, price, imageUrl })
         res.status(200).json(shoe)
     } catch (error) {
-        res.status(400).json({error: error.message})
+        res.status(400).json({ error: error.message })
     }
 }
 
