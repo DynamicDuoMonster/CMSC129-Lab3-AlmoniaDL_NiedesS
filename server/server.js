@@ -18,6 +18,7 @@ app.use(express.json());
 app.get('/', (req, res) => res.send("API is running...")); // test route
 
 app.use('/api/shoes',shoe_routes)
+app.use('/uploads', express.static('uploads'));
 
 app.get('/')
 
