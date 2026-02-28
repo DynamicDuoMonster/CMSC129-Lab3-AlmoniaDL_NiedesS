@@ -1,9 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')       
-const path = require('path')           
+const path = require('path')   
+
 const {
-    addShoe, getShoes, getShoe
+    addShoe, 
+    getShoes, 
+    getShoe,
+    deleteShoe,
+    updateShoe
 } = require('../controllers/shoeController')
 
 // Multer config
@@ -23,12 +28,8 @@ router.get('/:id', getShoe)
 
 router.post('/', upload.single('image'), addShoe)  // ← just one post route
 
-router.delete('/:id', (req, res) => {
-    res.json({mssg: 'DELETE single shoe info'})
-})
+router.delete('/:id', deleteShoe)
 
-router.patch('/:id', (req, res) => {
-    res.json({mssg: 'UPDATE single shoe info'})
-})
+router.patch('/:id', updateShoe)
 
 module.exports = router
