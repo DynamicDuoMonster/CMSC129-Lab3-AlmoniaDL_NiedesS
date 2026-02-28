@@ -5,7 +5,10 @@ const Schema = mongoose.Schema
 const userSchema = new Schema({
     username: {
         type: String,
-        required: true
+        required: true,
+        minlength: 3,
+        unique: true
+
     },
     email: {
         type: String,
@@ -17,10 +20,12 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        required: true
+        required: true,
+        enum: ['admin', 'customer'],
+        default: 'customer'
     },
     resetpasswordtoken: String,
-    
+
 })
 
 module.exports = mongoose.model('User', userSchema)
