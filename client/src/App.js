@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home'
 import Navbar from './components/Navbar'
 import Login from './pages/login'
+import Employee from './pages/dashboard';
 
 const Layout = () => {
   const location = useLocation();
@@ -19,6 +20,7 @@ const Layout = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Employee />} />
         </Routes>
       </div>
     </>
