@@ -22,6 +22,12 @@ const shoeSchema = new Schema({
     imageUrl: {
         type: String,
         required: true
+    },
+    sport: {
+        type: String
+    },
+    gender: {
+        type: String
     }
 })
 
