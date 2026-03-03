@@ -7,9 +7,10 @@
   --error: #e7195a;
 }
 body {
-  background: #f1f1f1;
+  background-color: #121212; /* A deep charcoal/black is easier on the eyes than pure #000 */
+  color: #ffffff;            /* Pure white text */
   margin: 0;
-  font-family: "Poppins";
+  font-family: 'Inter', sans-serif;
 }
 header {
   background: #fff;
@@ -30,41 +31,6 @@ header a {
   max-width: 1400px;
   padding: 20px;
   margin: 0 auto;
-}
-
-/* homepage */
-.home {
-  display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 100px;
-}
-.shoe-details {
-  background: #fff;
-  border-radius: 4px;
-  margin: 20px auto;
-  padding: 20px;
-  position: relative;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
-}
-.shoe-details h4 {
-  margin: 0 0 10px 0;
-  font-size: 1.2em;
-  color: var(--primary);
-}
-.shoe-details p {
-  margin: 0;
-  font-size: 0.9em;
-  color: #555;
-}
-.shoe-details span {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  cursor: pointer;
-  background: #f1f1f1;
-  padding: 6px;
-  border-radius: 50%;
-  color: #333;
 }
 
 .navbar {

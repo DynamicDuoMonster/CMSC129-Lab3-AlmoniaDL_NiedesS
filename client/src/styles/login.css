@@ -1,0 +1,56 @@
+/* login.css */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; 
+  /* Remove 'background-color: #000' so it inherits from body in index.css */
+  background-color: transparent; 
+  color: #fff;
+}
+
+.login-form {
+  /* Change this to pure black */
+  background: #000000; 
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid #333; /* Subtle border to separate from the bg */
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* Add a shadow so the black card "pops" off the dark grey bg */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Rest of your styles remain the same */
+.login-form input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333; /* Darker border for the inputs */
+  background: #1a1a1a;    /* Slightly lighter than the black form */
+  color: #fff;
+}
+
+.login-form button {
+  padding: 12px;
+  border-radius: 50px; 
+  border: none;
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.redirect-main {
+  text-align: right;
+}
+
+.redirect-main a {
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: underline;
+}

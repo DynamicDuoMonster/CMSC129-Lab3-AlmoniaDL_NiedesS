@@ -23,7 +23,7 @@ const shoeSchema = new Schema({
         type: String,
         required: true
     },
-    sport: {
+    category: {
         type: String
     },
     gender: {

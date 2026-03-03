@@ -1,0 +1,47 @@
+.navbar-header {
+  display: flex;
+  flex-direction: column; /* Stacks logo on top, pill on bottom */
+  align-items: center;    /* Centers both horizontally */
+  gap: 20px;              /* Adds space between logo and the pill */
+  padding: 20px 0;
+  background-color: #000;
+}
+
+.logo {
+  text-decoration: none;
+}
+
+.logo h1 {
+  color: #fff;
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+/* The Pill Shape */
+.nav-pill {
+  display: flex;
+  background-color: #1e1e1e;
+  padding: 6px;
+  border-radius: 50px; 
+  border: 1px solid #333;
+}
+
+.nav-item {
+  color: #888;
+  text-decoration: none;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+  color: #fff;
+}
+
+/* Active State */
+.nav-item.active {
+  background-color: #ffffff;
+  color: #000000;
+}
