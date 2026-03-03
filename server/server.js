@@ -7,18 +7,19 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const shoe_routes = require('./routes/shoes')
+const user_routes = require('./routes/user')
 
 connectDB();
  
 // Middleware
-app.use(cors());
+app.use(cors({origin: 'http://localhost:3000'}));
 app.use(express.json());
 
 // Routes
 app.get('/', (req, res) => res.send("API is running...")); // test route
 
 app.use('/api/shoes',shoe_routes)
-app.use('/uploads', express.static('uploads'));
+app.use('/api/user', user_routes);
 
 app.get('/')
 

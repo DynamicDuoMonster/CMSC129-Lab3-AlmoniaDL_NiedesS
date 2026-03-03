@@ -1,4 +1,4 @@
-const user = require('../models/userModel')
+const User = require('../models/userModel')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -7,16 +7,16 @@ const signupUser = async (req, res) => {
     const { username, email, password} = req.body
 
     try{
-        const usernameExists = await user.findOne({ username })
+        const usernameExists = await User.findOne({ username })
         if (usernameExists) return res.status(400).json({ error: 'Username already exists' })
         
-        const emailExists = await user.findOne({ email })
+        const emailExists = await User.findOne({ email })
         if (emailExists) return res.status(400).json({ error: 'Email already exists' })
 
-        const salt = await bycrypt.genSalt(10)
-        const hashedPassword = await bycrypt.hash(password, salt)
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
 
-        const user = await user.create({
+        const user = await User.create({
             username,
             email,
             password: hashedPassword,

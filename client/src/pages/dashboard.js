@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import '../styles/dashboard.css';
 
 const AdminDashboard = () => {
@@ -44,6 +44,7 @@ const AdminDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const user = JSON.parse(localStorage.getItem('user'));
     const formData = new FormData();
     formData.append('shoe_name', shoeName);
     formData.append('brand', brand);
@@ -54,8 +55,9 @@ const AdminDashboard = () => {
     formData.append('image', image);
 
     try {
-      const response = await axios.post('http://localhost:4000/api/shoes', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await api.post('/api/shoes', formData, {
+        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${user.token}` }
+
       });
       alert('Success! Shoe added to Cloudinary and MongoDB.');
       
