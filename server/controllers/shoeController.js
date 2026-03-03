@@ -31,10 +31,18 @@ const getShoe = async (req, res) => {
 // create new shoe
 const addShoe = async (req, res) => {
     const { shoe_name, brand, color, price } = req.body
-    const imageUrl = req.file ? `/uploads/shoes/${req.file.filename}` : null  // ← get image from multer
+    
+    // Cloudinary puts the full URL in req.file.path
+    const imageUrl = req.file ? req.file.path : null 
 
     try {
-        const shoe = await Shoe.create({ shoe_name, brand, color, price, imageUrl })
+        const shoe = await Shoe.create({ 
+            shoe_name, 
+            brand, 
+            color, 
+            price, 
+            imageUrl 
+        })
         res.status(200).json(shoe)
     } catch (error) {
         res.status(400).json({ error: error.message })

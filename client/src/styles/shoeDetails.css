@@ -1,47 +1,74 @@
 .shoe-details {
-  background: #1e1e1e;
-  color: #ffffff;
+  background: #000; /* Pure black form as requested */
+  color: #fff;
   border: 1px solid #333;
-  border-radius: 12px; /* Slightly rounder for a premium feel */
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  
-  /* Set fixed dimensions */
-  width: 200px;         /* Uniform width */
-  height: 180px;        /* Uniform height */
-  
-  /* Layout inside the card */
+  border-radius: 15px;
+  width: 200px;
+  height: 250px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Pushes price to the bottom */
-  
-  /* Prevent content overflow */
   overflow: hidden;
-  position: relative;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .shoe-details:hover {
-  transform: scale(1.02); /* Subtle "zoom" on hover */
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
 }
 
-.shoe-details h4 {
-  margin: 0 0 10px 0;
-  font-size: 1.2em;
-  color: #ffffff;
+.shoe-image-container {
+  width: 100%;
+  height: 140px;    /* Give the image a specific zone (e.g., 140px of the 250px) */
+  background: #111; /* Subtle dark grey background to show the area */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
-.shoe-details p {
-  font-weight: bold;
+
+.shoe-image-container img {
+  max-width: 140%;   /* Keeps the shoe from touching the edges */
+  max-height: 140%;
+  object-fit: contain; /* 'contain' is better for shoes so they don't get cropped */
+  
+  /* Use THIS if your shoe has a WHITE background you want to hide */
+  mix-blend-mode: screen; 
+}
+
+.shoe-info {
+  padding: 12px;    /* Reduced padding to fit the smaller 250px height */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;     /* Fills the rest of the card */
+}
+
+.brand-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.shoe-info h4 {
+  margin: 0;
+  font-size: 1rem; /* Smaller for the 250px card */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds '...' if the name is too long */
+}
+
+.color {
+  font-size: 0.9rem;
   color: #b3b3b3;
-  margin-top: 10px;
+  margin-top: 5px;
 }
-.shoe-details span {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  cursor: pointer;
-  background: #f1f1f1;
-  padding: 6px;
-  border-radius: 50%;
-  color: #333;
+
+.price {
+  margin-top: auto; /* Pushes price to the bottom */
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  border-top: 1px solid #222;
+  padding-top: 5px;
 }
