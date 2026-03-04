@@ -1,16 +1,17 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // pages and components
-import Home from './pages/Home'
-import Navbar from './components/Navbar'
-import Login from './pages/login'
-import Employee from './pages/dashboard';
+import Home from './view/pages/home'
+import Navbar from './view/components/Navbar'
+import Login from './view/pages/login'
+import Employee from './view/pages/dashboard';
+import SearchResults from './view/pages/search_results';
 
 const Layout = () => {
   const location = useLocation();
   
   // Define paths where you DON'T want the navbar to show
-  const hideNavbarPaths = ['/login'];
+  const hideNavbarPaths = ['/login', '/admin'];
 
   return (
     <>
@@ -19,6 +20,7 @@ const Layout = () => {
       <div className="content">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/search" element={<SearchResults />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Employee />} />
         </Routes>

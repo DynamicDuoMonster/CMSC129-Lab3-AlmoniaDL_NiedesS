@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
-import api from "../api";
-import '../styles/home.css'
+import api from "../../api";
 import '../styles/shoeDisplay.css'
 
 
@@ -13,11 +12,8 @@ const Home = () => {
     useEffect(() => {
         const fetchShoes = async () => {
             try {
-                // If your 'api' instance has baseURL: 'http://localhost:5000/api'
-                // you only need to fetch '/shoes'
                 const response = await api.get('/api/shoes') 
-                
-                // Axios automatically parses JSON into 'data'
+
                 setShoes(response.data) 
             } catch (error) {
                 console.error("Error fetching shoes:", error)
@@ -28,7 +24,7 @@ const Home = () => {
     }, [])
 
     return (
-        <div className="home">
+        <div className="shoe-display">
             <div className="shoes">
                 {shoes && shoes.map((shoe) => (
                     <ShoeDetails key={shoe._id} shoe={shoe}/>

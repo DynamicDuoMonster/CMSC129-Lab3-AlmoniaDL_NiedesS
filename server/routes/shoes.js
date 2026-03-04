@@ -8,7 +8,7 @@ const { requireAuth, requireAdmin } = require('../middleware/requireAuth')
 const {
     addShoe, 
     getShoes, 
-    getShoe,
+    getShoeByName,
     deleteShoe,
     updateShoe
 } = require('../controllers/shoeController')
@@ -33,7 +33,9 @@ const upload = multer({ storage })
 
 // get all shoes
 router.get('/', getShoes)
-router.get('/:id', getShoe)
+router.get('/search', getShoeByName)
+// router.get('/:id', getShoe)
+
 
 // protected routes
 router.post('/', requireAuth, requireAdmin, upload.single('image'), addShoe) 

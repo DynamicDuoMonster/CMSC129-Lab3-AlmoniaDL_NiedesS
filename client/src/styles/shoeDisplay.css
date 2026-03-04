@@ -1,7 +1,0 @@
-.shoes {
-  display: flex;
-  flex-wrap: wrap; /* Allows cards to move to the next line if the screen is narrow */
-  gap: 20px;       /* Creates consistent spacing between the cards */
-  justify-content: flex-start; /* Aligns them to the left */
-  padding: 20px;
-}

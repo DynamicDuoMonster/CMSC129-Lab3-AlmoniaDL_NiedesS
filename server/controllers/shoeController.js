@@ -11,21 +11,26 @@ const getShoes = async (req, res) => {
 
     res.status(200).json(shoes)
 }
+
 // get single shoe
-const getShoe = async (req, res) => {
-    const { id } = req.params
+const getShoeByName = async (req, res) => {
+    const { name } = req.query;
+    if (!name) return res.status(200).json([]);
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(404).json({error: 'No such shoe'})
+    try {
+        const shoes = await Shoe.find({
+            shoe_name: { 
+                $regex: name,   // Look for this string...
+                $options: 'i'   // ...and ignore case (A vs a)
+            }
+        })
+        .limit(20) 
+        .lean();
+
+        res.status(200).json(shoes);
+    } catch (error) {
+        res.status(500).json({ error: "Search failed" });
     }
-
-    const shoe = await Shoe.findById(id)
-
-    if(!shoe) {
-        return res.status(404).json({error: 'No such shoe'})
-    }
-
-    res.status(200).json(shoe)
 }
 
 // create new shoe
@@ -88,7 +93,7 @@ const updateShoe = async (req, res) => {
 module.exports = {
     addShoe, 
     getShoes, 
-    getShoe,
+    getShoeByName,
     deleteShoe,
     updateShoe
 }
