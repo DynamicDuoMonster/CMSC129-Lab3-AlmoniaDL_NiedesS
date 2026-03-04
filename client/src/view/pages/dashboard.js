@@ -1,128 +1,84 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../api';
+import AdminShoeCard from '../components/AdminShoeCard';
+import AddShoeForm from '../components/AddShoeForm';
+import SidePanel from '../components/SidePanel';
 import '../styles/dashboard.css';
+import '../styles/shoeDisplay.css';
+import EditShoeModal from '../components/EditShoeModal';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  const [shoeName, setShoeName] = useState('');
-  const [brand, setBrand] = useState('');
-  const [price, setPrice] = useState('');
-  const [color, setColor] = useState('');
-  const [category, setCategory] = useState('');
-  const [gender, setGender] = useState('');
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null); // State for the live preview
+  const navigate = useNavigate();
+  const [editShoe, setEditShoe] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
-  // Handle file selection (via click)
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-    }
+  const [shoes, setShoes] = useState(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchShoes = async () => {
+      try {
+        const res = await api.get('/api/shoes');
+        setShoes(res.data);
+      } catch (err) {
+        console.error('Error fetching shoes:', err);
+      }
+    };
+    fetchShoes();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+  const handleEdit = (shoe) => {
+  setEditShoe(shoe);
+  setEditModalOpen(true);
+  };
+  const handleEditSuccess = (updatedShoe) => {
+  setShoes(shoes.map(s => s._id === updatedShoe._id ? updatedShoe : s));
+  setEditModalOpen(false);
   };
 
-  // Drag and Drop Handlers
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.add('drag-active');
-  };
-
-  const handleDragLeave = (e) => {
-    e.currentTarget.classList.remove('drag-active');
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.remove('drag-active');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const user = JSON.parse(localStorage.getItem('user'));
-    const formData = new FormData();
-    formData.append('shoe_name', shoeName);
-    formData.append('brand', brand);
-    formData.append('price', price);
-    formData.append('color', color); 
-    formData.append('category', category);
-    formData.append('gender', gender);
-    formData.append('image', image);
-
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this shoe?')) return;
     try {
-      const response = await api.post('/api/shoes', formData, {
-        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${user.token}` }
-
-      });
-      alert('Success! Shoe added to Cloudinary and MongoDB.');
-      
-      // Optional: Clear form after success
-      setShoeName(''); setBrand(''); setPrice(''); setColor(''); 
-      setPreview(null); setImage(null);
+      await api.delete(`/api/shoes/${id}`);
+      setShoes(shoes.filter(shoe => shoe._id !== id));
     } catch (err) {
-      console.error(err);
-      alert('Error uploading shoe. Check the console.');
+      console.error('Error deleting shoe:', err);
     }
   };
 
   return (
-    <div className="login-container">
-      <form className="login-form admin-form" onSubmit={handleSubmit}>
-        <h2>Shoe Management</h2>
-        
-        {/* Drag and Drop Zone / Preview Box */}
-        <div 
-          className={`preview-zone ${preview ? 'has-image' : ''}`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => document.getElementById('file-input').click()}
-        >
-          {preview ? (
-            <img src={preview} alt="Preview" className="image-preview" />
-          ) : (
-            <div className="preview-placeholder">
-              <span>Drop Image Here or Click to Upload</span>
-              <p>(PNG/WebP with transparent BG recommended)</p>
-            </div>
-          )}
-          <input 
-            type="file" 
-            id="file-input"
-            accept="image/*" 
-            onChange={handleFileChange} 
-            hidden 
+    <div className="admin-dashboard">
+      <div className="dashboard-header">
+        <h2>All Products</h2>
+        <div className="header-actions">
+          <button className="add-btn" onClick={() => setPanelOpen(true)}>+ Add Shoe</button>
+          <button className="logout-btn" onClick={handleLogout}>Log Out</button>  {/* 👈 */}
+        </div>
+      </div>
+
+      <div className="shoes">
+        {shoes && shoes.map((shoe) => (
+          <AdminShoeCard key={shoe._id} shoe={shoe} onDelete={handleDelete} onEdit={handleEdit} />
+        ))}
+      </div>
+       {editModalOpen && (              
+        <EditShoeModal
+          shoe={editShoe}
+          onSuccess={handleEditSuccess}
+          onClose={() => setEditModalOpen(false)}
           />
-        </div>
-
-        <input type="text" placeholder="Shoe Name" value={shoeName} onChange={(e) => setShoeName(e.target.value)} required />
-        <input type="text" placeholder="Brand (e.g. Nike)" value={brand} onChange={(e) => setBrand(e.target.value)} required />
-        <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} required />
-        <input type="text" placeholder="Colors (comma separated)" value={color} onChange={(e) => setColor(e.target.value)} required />
-        
-        <div className="select-row">
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="">Category</option>
-            <option value="Running">Running</option>
-            <option value="Basketball">Basketball</option>
-            <option value="Lifestyle">Lifestyle</option>
-          </select>
-
-          <select value={gender} onChange={(e) => setGender(e.target.value)}>
-            <option value="">Gender</option>
-            <option value="Mens">Mens</option>
-            <option value="Womens">Womens</option>
-            <option value="Kids">Kids</option>
-          </select>
-        </div>
-
-        <button type="submit" className="upload-btn">Add Product</button>
-      </form>
+          )} 
+          <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} title="Add New Shoe">
+        <AddShoeForm onSuccess={(newShoe) => {
+          setShoes([...shoes, newShoe]);
+          setPanelOpen(false);
+        }} />
+      </SidePanel>
     </div>
   );
 };

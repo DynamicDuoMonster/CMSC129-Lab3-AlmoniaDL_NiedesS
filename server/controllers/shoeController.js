@@ -62,13 +62,18 @@ const deleteShoe = async (req, res) => {
         return res.status(404).json({error: 'No such shoe'})
     }
 
-    const shoe = await Shoe.findOneAndDelete({_id: id})
+    try {
+        const shoe = await Shoe.findOneAndDelete({_id: id})
 
-    if (!workout) {
-        return res.status(400).json({error: 'No such workout'})
-    } 
+        if (!shoe) {
+            return res.status(400).json({error: 'No such shoe'})
+        } 
 
-    res.status(200).json({shoe})
+        res.status(200).json({shoe})
+    } catch (error) {
+        console.error('Delete error:', error)  // 👈 this will show the real error in your backend terminal
+        res.status(500).json({error: error.message})
+    }
 }
 
 // update shoe
@@ -79,15 +84,17 @@ const updateShoe = async (req, res) => {
         return res.status(404).json({error: 'No such shoe'})
     }
 
-    const shoe = await Shoe.findOneAndUpdate({_id: id}, {
-        ...req.body 
-    })
+    const shoe = await Shoe.findOneAndUpdate(
+        {_id: id}, 
+        {...req.body},
+        { new: true }  // Return the updated document
+    )
 
     if (!shoe) {
         return res.status(400).json({error: 'No such shoe'})
     }
 
-    res.status(200).json({shoe})
+    res.status(200).json(shoe)
 }
 
 module.exports = {
