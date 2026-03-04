@@ -25,54 +25,42 @@ const Navbar = () => {
     };
 
 
-    return (
-        <header className="navbar-header">
-            <Link to="/" className="logo">
-                <h1>SoleSearch</h1>
-            </Link>
+        return (
+            <header className="navbar-header">
+                <div className="navbar-left">
+                    <Link to="/" className="logo">
+                        <h1>SoleSearch</h1>
+                    </Link>
+                    <input
+                        type="text"
+                        placeholder="Search shoes..."
+                        value={shoeName}
+                        onChange={handleSearch}
+                        className="search-input"
+                    />
+                </div>
 
-            <nav className="nav-pill">
-                <NavLink to="/Lifestyle" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    Lifestyle
-                </NavLink>
-                <NavLink to="/Sports" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    Sports
-                </NavLink>
-                <NavLink to="/Mens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    Mens
-                </NavLink>
-                <NavLink to="/Womens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    Womens
-                </NavLink>
-            </nav>
+                <nav className="nav-pill">
+                    <NavLink to="/Lifestyle" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Lifestyle</NavLink>
+                    <NavLink to="/Sports" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Sports</NavLink>
+                    <NavLink to="/Mens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Mens</NavLink>
+                    <NavLink to="/Womens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Womens</NavLink>
+                </nav>
 
-            <div className="nav-right">
-                {user ? (
-                    <div className="nav-account">
-                        <NavLink to="/account" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                            {user.username}
-                        </NavLink>
-                        <button className="nav-item logout-btn" onClick={handleLogout}>
-                            Log out
-                        </button>
-                    </div>
-                ) : (
-                    <NavLink to="/login" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                        Log in
-                    </NavLink>
-                )}
-
-                <input
-                    type="text"
-                    placeholder="Search shoes..."
-                    value={shoeName}
-                    onChange={handleSearch}
-                    className="search-input"
-                    required
-                />
-            </div>
-        </header>
-    );
+                <div className="nav-right">
+                    {user ? (
+                        <div className="nav-account">
+                            <NavLink to="/account" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                                {user.username}
+                            </NavLink>
+                            <button className="nav-item logout-btn" onClick={handleLogout}>Log out</button>
+                        </div>
+                    ) : (
+                        <NavLink to="/login" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Log in</NavLink>
+                    )}
+                </div>
+            </header>
+        );
 };
 
 export default Navbar;
