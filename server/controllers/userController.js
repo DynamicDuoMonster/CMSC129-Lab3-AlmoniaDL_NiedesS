@@ -24,6 +24,14 @@ const signupUser = async (req, res) => {
         })
 
         const token = jwt.sign({_id: user._id}, process.env.SECRET, { expiresIn: '3d'})
+
+        res.status(200).json({ 
+            username: user.username, 
+            email: user.email, 
+            token, 
+            role: user.role 
+        })
+        
     } catch (error) {
         res.status(400).json({ error: error.message })
     }

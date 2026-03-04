@@ -12,7 +12,7 @@ const getShoes = async (req, res) => {
     res.status(200).json(shoes)
 }
 
-// get single shoe
+// get single shoe by name
 const getShoeByName = async (req, res) => {
     const { name } = req.query;
     if (!name) return res.status(200).json([]);
@@ -30,6 +30,24 @@ const getShoeByName = async (req, res) => {
         res.status(200).json(shoes);
     } catch (error) {
         res.status(500).json({ error: "Search failed" });
+    }
+}
+
+// get single shoe by id
+const getShoeById = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'Invalid ID' });
+    }
+
+    try {
+        const shoe = await Shoe.findById(id);
+        if (!shoe) return res.status(404).json({ error: 'Shoe not found' });
+        
+        res.status(200).json(shoe);
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
     }
 }
 
@@ -108,6 +126,7 @@ module.exports = {
     addShoe, 
     getShoes, 
     getShoeByName,
+    getShoeById,
     deleteShoe,
     updateShoe
 }

@@ -57,10 +57,16 @@ const Navbar = () => {
                         </button>
                     </div>
                 ) : (
-                    <NavLink to="/login" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                        Log in
-                    </NavLink>
+                    <div className="nav-auth">
+                        <NavLink to="/login" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                            Log in
+                        </NavLink>
+                        <NavLink to="/signup" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                            Sign up
+                        </NavLink>
+                    </div>
                 )}
+
 
                 <input
                     type="text"

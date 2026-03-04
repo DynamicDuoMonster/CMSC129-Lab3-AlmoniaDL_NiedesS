@@ -1,19 +1,25 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom' // Import this
 import '../styles/shoeDetails.css'
 
 const ShoeDetails = ({ shoe }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
-  // Cycle through images only when hovered
+  // Click handler to redirect
+  const handleCardClick = () => {
+    navigate(`/shoe/${shoe._id}`);
+  };
+
   useEffect(() => {
     let interval;
     if (isHovered && shoe.imageUrl.length > 1) {
       interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % shoe.imageUrl.length);
-      }, 1200); // Change image every 1.2 seconds
+      }, 1200);
     } else {
-      setCurrentIndex(0); // Reset to first image when mouse leaves
+      setCurrentIndex(0);
     }
     return () => clearInterval(interval);
   }, [isHovered, shoe.imageUrl.length]);
@@ -23,24 +29,23 @@ const ShoeDetails = ({ shoe }) => {
       className="shoe-details"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
+      style={{ cursor: 'pointer' }}
     >
       <div className="shoe-image-container">
         {shoe.imageUrl && shoe.imageUrl.length > 0 && (
           <img 
             src={shoe.imageUrl[currentIndex]} 
-            alt={`${shoe.shoe_name} - view ${currentIndex + 1}`} 
+            alt={`${shoe.shoe_name}`} 
             className="fade-in"
-            key={currentIndex} // Forces animation on image swap
+            key={currentIndex} 
           />
         )}
         
         {shoe.imageUrl.length > 1 && isHovered && (
           <div className="image-dots">
             {shoe.imageUrl.map((_, i) => (
-              <div 
-                key={i} 
-                className={`dot ${i === currentIndex ? 'active' : ''}`}
-              />
+              <div key={i} className={`dot ${i === currentIndex ? 'active' : ''}`} />
             ))}
           </div>
         )}
