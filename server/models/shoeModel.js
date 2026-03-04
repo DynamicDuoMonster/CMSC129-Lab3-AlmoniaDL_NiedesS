@@ -6,16 +6,16 @@ const shoeSchema = new Schema({
     brand: { type: String, required: true, index: true }, // Index for fast filtering by brand
     color: { type: [String], required: true },
     price: { type: Number, required: true, index: true }, // Index for price sorting/filtering
-    imageUrl: { type: String, required: true },
+    imageUrl: { type: [String], required: true, default: [] },
     category: { type: String, index: true },
     gender: { type: String, index: true }
 }, { timestamps: true }) // Adds createdAt/updatedAt automatically
 
 // Create a compound text index for the search bar
-shoeSchema.index({ 
-    shoe_name: 'text', 
-    brand: 'text', 
-    category: 'text' 
+shoeSchema.index({
+    shoe_name: 'text',
+    brand: 'text',
+    category: 'text'
 }, {
     weights: { shoe_name: 10, brand: 5, category: 1 } // Priorities: name is most important
 });

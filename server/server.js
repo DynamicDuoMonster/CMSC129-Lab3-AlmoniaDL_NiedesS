@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000;
 
 const shoe_routes = require('./routes/shoes')
 const user_routes = require('./routes/user')
-
+const cart_routes = require('./routes/cart')
 connectDB();
  
 // Middleware
@@ -17,7 +17,7 @@ app.use(express.json());
 
 // Routes
 app.get('/', (req, res) => res.send("API is running...")); // test route
-
+app.use('/api/cart', cart_routes)
 app.use('/api/shoes',shoe_routes)
 app.use('/api/user', user_routes);
 

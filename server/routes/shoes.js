@@ -9,6 +9,7 @@ const {
     addShoe, 
     getShoes, 
     getShoeByName,
+    getShoeById,
     deleteShoe,
     updateShoe
 } = require('../controllers/shoeController')
@@ -34,11 +35,11 @@ const upload = multer({ storage })
 // get all shoes
 router.get('/', getShoes)
 router.get('/search', getShoeByName)
-// router.get('/:id', getShoe)
+router.get('/:id', getShoeById)
 
 
 // protected routes
-router.post('/', requireAuth, requireAdmin, upload.single('image'), addShoe) 
+router.post('/', requireAuth, requireAdmin, upload.array('image', 5), addShoe)
 router.delete('/:id', requireAuth, requireAdmin, deleteShoe)
 router.patch('/:id', requireAuth, requireAdmin, updateShoe)
 

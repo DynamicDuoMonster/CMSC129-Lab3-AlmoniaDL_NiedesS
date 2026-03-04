@@ -12,7 +12,7 @@ const getShoes = async (req, res) => {
     res.status(200).json(shoes)
 }
 
-// get single shoe
+// get single shoe by name
 const getShoeByName = async (req, res) => {
     const { name } = req.query;
     if (!name) return res.status(200).json([]);
@@ -33,20 +33,45 @@ const getShoeByName = async (req, res) => {
     }
 }
 
+// get single shoe by id
+const getShoeById = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'Invalid ID' });
+    }
+
+    try {
+        const shoe = await Shoe.findById(id);
+        if (!shoe) return res.status(404).json({ error: 'Shoe not found' });
+        
+        res.status(200).json(shoe);
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+}
+
 // create new shoe
 const addShoe = async (req, res) => {
-    const { shoe_name, brand, color, price } = req.body
+    const { shoe_name, brand, color, price, category, gender } = req.body
     
     // Cloudinary puts the full URL in req.file.path
-    const imageUrl = req.file ? req.file.path : null 
+    const imageUrls = req.files ? req.files.map(file => file.path) : [];
+
+    let colorArray = color;
+    if (typeof color === 'string') {
+        colorArray = color.split(',').map(c => c.trim()).filter(c => c !== "");
+    }
 
     try {
         const shoe = await Shoe.create({ 
             shoe_name, 
             brand, 
-            color, 
-            price, 
-            imageUrl 
+            color: colorArray, 
+            price: Number(price), 
+            imageUrl: imageUrls,
+            category,
+            gender
         })
         res.status(200).json(shoe)
     } catch (error) {
@@ -101,6 +126,7 @@ module.exports = {
     addShoe, 
     getShoes, 
     getShoeByName,
+    getShoeById,
     deleteShoe,
     updateShoe
 }
