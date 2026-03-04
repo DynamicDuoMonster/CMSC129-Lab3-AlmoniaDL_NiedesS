@@ -1,29 +1,37 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import api from '../../api';
 import '../styles/dashboard.css';
 
 const AddShoeForm = ({ onSuccess }) => {
+  const fileInputRef = useRef(null);
   const [shoeName, setShoeName] = useState('');
   const [brand, setBrand] = useState('');
   const [price, setPrice] = useState('');
   const [color, setColor] = useState('');
   const [category, setCategory] = useState('');
   const [gender, setGender] = useState('');
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) { setImage(file); setPreview(URL.createObjectURL(file)); }
+    const files = Array.from(e.target.files);
+    handleFiles(files);
   };
+
+  const handleFiles = (files) => {
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    
+    setImages(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...newPreviews]);
+  }
 
   const handleDragOver = (e) => { e.preventDefault(); e.currentTarget.classList.add('drag-active'); };
   const handleDragLeave = (e) => { e.currentTarget.classList.remove('drag-active'); };
   const handleDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-active');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) { setImage(file); setPreview(URL.createObjectURL(file)); }
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    handleFiles(files);
   };
 
   const handleSubmit = async (e) => {
@@ -35,15 +43,18 @@ const AddShoeForm = ({ onSuccess }) => {
     formData.append('color', color);
     formData.append('category', category);
     formData.append('gender', gender);
-    formData.append('image', image);
+
+    images.forEach((img) => {
+      formData.append('image', img);
+    })
 
     try {
       const res = await api.post('/api/shoes', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setShoeName(''); setBrand(''); setPrice(''); setColor('');
-      setCategory(''); setGender(''); setPreview(null); setImage(null);
-      onSuccess(res.data);  // 👈 pass new shoe back to dashboard
+      setCategory(''); setGender(''); setPreviews([]); setImages([]);
+      onSuccess(res.data); 
     } catch (err) {
       console.error(err);
       alert('Error uploading shoe.');
@@ -53,21 +64,43 @@ const AddShoeForm = ({ onSuccess }) => {
   return (
     <form className="admin-form" onSubmit={handleSubmit}>
       <div
-        className={`preview-zone ${preview ? 'has-image' : ''}`}
+        className={`preview-zone ${previews.length > 0 ? 'has-image' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => document.getElementById('file-input').click()}
+        onClick={(e) => {
+          document.getElementById('file-input').click();
+        }}
       >
-        {preview ? (
-          <img src={preview} alt="Preview" className="image-preview" />
+        {previews.length > 0 ? (
+          <div className="preview-grid">
+            {previews.map((url, index) => (
+              <img 
+                key={index} 
+                src={url} 
+                alt={`Preview ${index}`} 
+                className="image-preview-item" 
+              />
+            ))}
+            <div className="add-more-overlay">+ Add More</div>
+          </div>
         ) : (
           <div className="preview-placeholder">
-            <span>Drop Image Here or Click to Upload</span>
-            <p>(PNG/WebP with transparent BG recommended)</p>
+            <span>Drop Images Here or Click to Upload</span>
+            <p>(You can select multiple files)</p>
           </div>
         )}
-        <input type="file" id="file-input" accept="image/*" onChange={handleFileChange} hidden />
+
+        <input 
+          ref={fileInputRef}
+          type="file" 
+          id="file-input" 
+          accept="image/*" 
+          onChange={handleFileChange} 
+          onClick={(e) => e.stopPropagation()} 
+          multiple 
+          hidden 
+        />
       </div>
 
       <input type="text" placeholder="Shoe Name" value={shoeName} onChange={(e) => setShoeName(e.target.value)} required />

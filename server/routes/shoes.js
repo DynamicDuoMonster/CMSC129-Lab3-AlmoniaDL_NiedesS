@@ -38,7 +38,7 @@ router.get('/search', getShoeByName)
 
 
 // protected routes
-router.post('/', requireAuth, requireAdmin, upload.single('image'), addShoe) 
+router.post('/', requireAuth, requireAdmin, upload.array('image', 5), addShoe)
 router.delete('/:id', requireAuth, requireAdmin, deleteShoe)
 router.patch('/:id', requireAuth, requireAdmin, updateShoe)
 
