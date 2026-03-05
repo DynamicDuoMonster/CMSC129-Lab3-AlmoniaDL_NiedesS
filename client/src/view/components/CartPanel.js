@@ -23,6 +23,7 @@ const CartPanel = ({ isOpen, onClose }) => {
     try {
       const res = await api.delete(`/api/cart/${shoeId}`);
       setCart(res.data);
+      window.dispatchEvent(new Event('cart-updated')) // ← notify navbar
     } catch (err) {
       console.error('Error removing item:', err);
     }
