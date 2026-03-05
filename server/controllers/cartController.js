@@ -1,5 +1,28 @@
 const { PrimaryCart, BackupCart } = require('../models/cartModel')
 
+// cartController.js
+const updateCartItem = async (req, res) => {
+    const { shoeId } = req.params;
+    const { quantity } = req.body;
+    try {
+        const cart = await PrimaryCart.findOne({ user: req.user._id });
+        const item = cart.items.find(i => i.shoe.toString() === shoeId);
+        if (!item) return res.status(404).json({ error: 'Item not found' });
+        item.quantity = quantity;
+        await Promise.all([
+            cart.save(),
+            BackupCart.findOneAndUpdate(
+                { user: req.user._id },
+                { items: cart.items },
+                { new: true, upsert: true }
+            )
+        ]);
+        const populated = await cart.populate('items.shoe');
+        res.status(200).json(populated);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 // GET cart for logged in user
 const getCart = async (req, res) => {
     try {
@@ -80,4 +103,4 @@ const removeFromCart = async (req, res) => {
     }
 }
 
-module.exports = { getCart, addToCart, removeFromCart }
+module.exports = { getCart, addToCart, removeFromCart, updateCartItem }

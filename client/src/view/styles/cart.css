@@ -146,3 +146,32 @@
 }
 
 .checkout-btn:hover { background: #e0e0e0; }
+
+.cart-item-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.qty-btn {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover { background: #444; }
+
+.qty-value {
+  min-width: 20px;
+  text-align: center;
+  color: #fff;
+}

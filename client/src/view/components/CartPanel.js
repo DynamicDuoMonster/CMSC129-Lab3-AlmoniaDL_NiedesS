@@ -8,7 +8,7 @@ const CartPanel = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) fetchCart();
-  }, [isOpen]); 
+  }, [isOpen]);
 
   const fetchCart = async () => {
     try {
@@ -23,9 +23,24 @@ const CartPanel = ({ isOpen, onClose }) => {
     try {
       const res = await api.delete(`/api/cart/${shoeId}`);
       setCart(res.data);
-      window.dispatchEvent(new Event('cart-updated')) // ← notify navbar
+      window.dispatchEvent(new Event('cart-updated'));
     } catch (err) {
       console.error('Error removing item:', err);
+    }
+  };
+
+  const handleQuantity = async (shoeId, currentQty, delta) => {
+    const newQty = currentQty + delta;
+    if (newQty < 1) {
+      handleRemove(shoeId);
+      return;
+    }
+    try {
+      const res = await api.patch(`/api/cart/${shoeId}`, { quantity: newQty });
+      setCart(res.data);
+      window.dispatchEvent(new Event('cart-updated'));
+    } catch (err) {
+      console.error('Error updating quantity:', err);
     }
   };
 
@@ -46,7 +61,17 @@ const CartPanel = ({ isOpen, onClose }) => {
                     <p className="cart-item-name">{item.shoe.shoe_name}</p>
                     <p className="cart-item-brand">{item.shoe.brand}</p>
                     <p className="cart-item-price">${item.shoe.price.toLocaleString()}</p>
-                    <p className="cart-item-qty">Qty: {item.quantity}</p>
+                    <div className="cart-item-qty-controls">
+                      <button
+                        className="qty-btn"
+                        onClick={() => handleQuantity(item.shoe._id, item.quantity, -1)}
+                      >−</button>
+                      <span className="qty-value">{item.quantity}</span>
+                      <button
+                        className="qty-btn"
+                        onClick={() => handleQuantity(item.shoe._id, item.quantity, +1)}
+                      >+</button>
+                    </div>
                   </div>
                   <button className="cart-remove-btn" onClick={() => handleRemove(item.shoe._id)}>✕</button>
                 </div>
