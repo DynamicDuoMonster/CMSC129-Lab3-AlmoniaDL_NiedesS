@@ -27,20 +27,29 @@ const getShoes = async (req, res) => {
         const shoes = await PrimaryShoe.find({}).sort({ createdAt: -1 });
         res.status(200).json(shoes);
     } catch (error) {
-        console.warn("⚠️ Atlas Down. Fetching from Azure...");
+        console.warn("Atlas Down. Fetching from Azure...");
         const backupShoes = await BackupShoe.find({}).sort({ createdAt: -1 });
         res.status(200).json(backupShoes);
     }
 };
 
 const getShoeByName = async (req, res) => {
-    const { q } = req.query;
-    const query = { $text: { $search: q } };
+    const { q, category, gender } = req.query;
+    
+    let query = {};
+
+    if (q) query.$text = { $search: q };
+    if (category) query.category = category;
+    if (gender) query.gender = gender;
+
     try {
-        const shoes = await PrimaryShoe.find(query);
+        // Try Primary (Atlas)
+        const shoes = await PrimaryShoe.find(query).sort({ createdAt: -1 });
         res.status(200).json(shoes);
     } catch (error) {
-        const backupShoes = await BackupShoe.find(query);
+        console.warn("Sync Fallback: Fetching from Azure...");
+        // Fallback to Backup (Azure)
+        const backupShoes = await BackupShoe.find(query).sort({ createdAt: -1 });
         res.status(200).json(backupShoes);
     }
 };

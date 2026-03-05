@@ -1,11 +1,18 @@
-import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import '../styles/navbar.css';
 
 const Navbar = () => {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
     const [shoeName, setShoeName] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Helper to see if a filter is currently active in the URL
+    const isActiveFilter = (key, value) => {
+        const searchParams = new URLSearchParams(location.search);
+        return searchParams.get(key) === value;
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -18,12 +25,11 @@ const Navbar = () => {
         setShoeName(query);
 
         if (query.length > 0) {
-            navigate(`/search?name=${query}`);
+            navigate(`/search?q=${query}`); // Changed 'name' to 'q' to match your controller
         } else {
             navigate('/');
         }
     };
-
 
     return (
         <header className="navbar-header">
@@ -32,18 +38,31 @@ const Navbar = () => {
             </Link>
 
             <nav className="nav-pill">
-                <NavLink to="/Lifestyle" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                {/* We use Link to /search with query params to trigger the unified controller */}
+                <Link 
+                    to="/search?category=Lifestyle" 
+                    className={isActiveFilter('category', 'Lifestyle') ? "nav-item active" : "nav-item"}
+                >
                     Lifestyle
-                </NavLink>
-                <NavLink to="/Sports" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                </Link>
+                <Link 
+                    to="/search?category=Sports" 
+                    className={isActiveFilter('category', 'Sports') ? "nav-item active" : "nav-item"}
+                >
                     Sports
-                </NavLink>
-                <NavLink to="/Mens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                </Link>
+                <Link 
+                    to="/search?gender=Mens" 
+                    className={isActiveFilter('gender', 'Mens') ? "nav-item active" : "nav-item"}
+                >
                     Mens
-                </NavLink>
-                <NavLink to="/Womens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                </Link>
+                <Link 
+                    to="/search?gender=Womens" 
+                    className={isActiveFilter('gender', 'Womens') ? "nav-item active" : "nav-item"}
+                >
                     Womens
-                </NavLink>
+                </Link>
             </nav>
 
             <div className="nav-right">
@@ -66,7 +85,6 @@ const Navbar = () => {
                         </NavLink>
                     </div>
                 )}
-
 
                 <input
                     type="text"

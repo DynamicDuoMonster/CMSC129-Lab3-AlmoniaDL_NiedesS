@@ -12,13 +12,18 @@ const SearchResults = () => {
     const [shoes, setShoes] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const query = searchParams.get("name");
+    const q = searchParams.get("q");
+    const category = searchParams.get("category");
+    const gender = searchParams.get("gender");
+
+    const displayLabel = q || category || gender || "All Shoes";
 
     useEffect(() => {
         const fetchShoes = async () => {
+            setLoading(true);
             try {
-                const response = await api.get(`/api/shoes/search?name=${query}`);
-                setShoes(response.data); // Axios puts results in .data
+                const response = await api.get(`/api/shoes/search?${searchParams.toString()}`);
+                setShoes(response.data);
             } catch (err) {
                 console.error("Search failed", err);
             } finally {
@@ -26,27 +31,27 @@ const SearchResults = () => {
             }
         };
 
-        if (query) {
+        if (q || category || gender) {
             fetchShoes();
         } else {
             setLoading(false);
         }
-    }, [query]); // Re-runs every time the user types and the URL changes
+    }, [searchParams]);
 
     return (
-        <div className="search-page">
-            <h2>Results for: "{query}"</h2>
+        <div className="shoe-display">
+            <h2 style={{ padding: '20px' }}>Showing: "{displayLabel}"</h2>
 
             {loading && <p>Loading shoes...</p>}
 
-            {!loading && shoes.length === 0 && <p>No shoes found matching that name.</p>}
+            {!loading && shoes.length === 0 && (
+                <p style={{ padding: '20px' }}>No shoes found matching these filters.</p>
+            )}
 
-            <div className="shoe-display">
-                <div className="shoe">
-                    {shoes && shoes.map((shoe) => (
-                        <ShoeDetails key={shoe._id} shoe={shoe} />
-                    ))}
-                </div>
+            <div className="shoes"> 
+                {!loading && shoes.map((shoe) => (
+                    <ShoeDetails key={shoe._id} shoe={shoe} />
+                ))}
             </div>
         </div>
     );
