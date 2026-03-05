@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import { useNavigate } from "react-router-dom";
 import "../styles/trash.css";
+import "../styles/dashboard.css";
+import ConfirmModal from "../components/ConfirmModal";
 
 const Trash = () => {
   const [trashedShoes, setTrashedShoes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmId, setConfirmId] = useState(null);
   const navigate = useNavigate();
 
   const fetchTrash = async () => {
@@ -32,13 +35,14 @@ const Trash = () => {
     }
   };
 
-  const handlePermanentDelete = async (id) => {
-    if (!window.confirm("Permanently delete this shoe? This cannot be undone.")) return;
+  const confirmPermanentDelete = async () => {
     try {
-      await api.delete(`/api/shoes/${id}`);
-      setTrashedShoes((prev) => prev.filter((shoe) => shoe._id !== id));
+      await api.delete(`/api/shoes/${confirmId}`);
+      setTrashedShoes((prev) => prev.filter((shoe) => shoe._id !== confirmId));
     } catch (err) {
       console.error("Failed to permanently delete shoe", err);
+    } finally {
+      setConfirmId(null);
     }
   };
 
@@ -46,10 +50,11 @@ const Trash = () => {
 
   return (
     <div className="trash-page">
-      <h1 className="trash-title">🗑 Trash</h1>
-      <button className="trash-back-btn" onClick={() => navigate('/admin')}>
+        <button className="trash-back-btn" onClick={() => navigate('/admin')}>
         ← Back to Dashboard
-      </button>
+        </button>
+
+      <h1 className="trash-title">🗑 Trash</h1>
 
       {trashedShoes.length === 0 ? (
         <p className="trash-empty">Trash is empty.</p>
@@ -69,12 +74,20 @@ const Trash = () => {
               <button className="btn-restore" onClick={() => handleRestore(shoe._id)}>
                 Restore
               </button>
-              <button className="btn-permanent-delete" onClick={() => handlePermanentDelete(shoe._id)}>
+              <button className="btn-permanent-delete" onClick={() => setConfirmId(shoe._id)}>
                 Delete Permanently
               </button>
             </div>
           ))}
         </div>
+      )}
+
+      {confirmId && (
+        <ConfirmModal
+          message="Permanently delete this shoe? This cannot be undone."
+          onConfirm={confirmPermanentDelete}
+          onCancel={() => setConfirmId(null)}
+        />
       )}
     </div>
   );

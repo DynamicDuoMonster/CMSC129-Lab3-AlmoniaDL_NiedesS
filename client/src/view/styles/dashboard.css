@@ -282,3 +282,90 @@ body {
 .remove-image-btn:hover {
   background-color: #f44336;
 }
+
+.change-image-btn {
+  padding: 8px 14px;
+  background: transparent;
+  color: #aaa;
+  border: 1px dashed #555;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.change-image-btn:hover {
+  border-color: #aaa;
+  color: #fff;
+}
+
+.edit-image-preview-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mini-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.confirm-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 2rem;
+  z-index: 1001;
+  text-align: center;
+  min-width: 280px;
+}
+
+.confirm-modal p {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirm-cancel-btn {
+  padding: 8px 20px;
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.confirm-cancel-btn:hover {
+  background: #222;
+  color: #fff;
+}
+
+.confirm-delete-btn {
+  padding: 8px 20px;
+  background: #ff3b3b22;
+  color: #ff3b3b;
+  border: 1px solid #ff3b3b44;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.confirm-delete-btn:hover {
+  background: #ff3b3b44;
+}

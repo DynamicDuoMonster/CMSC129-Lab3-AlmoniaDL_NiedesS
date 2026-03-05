@@ -110,7 +110,7 @@ const AddShoeForm = ({ onSuccess }) => {
           onChange={handleFileChange} 
           onClick={(e) => e.stopPropagation()} 
           multiple 
-          hidden 
+          style={{ display: 'none' }}
         />
       </div>
 

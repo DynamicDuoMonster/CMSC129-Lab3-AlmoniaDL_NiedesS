@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom' // Import this
 import '../styles/shoeDetails.css'
 
-const ShoeDetails = ({ shoe }) => {
+const ShoeDetails = ({ shoe, disableClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate(); // Initialize navigate
 
   // Click handler to redirect
   const handleCardClick = () => {
+    if (disableClick) return;
     navigate(`/shoe/${shoe._id}`);
   };
-
   useEffect(() => {
     let interval;
     if (isHovered && shoe.imageUrl.length > 1) {
@@ -30,7 +30,7 @@ const ShoeDetails = ({ shoe }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: disableClick ? 'default' : 'pointer' }}
     >
       <div className="shoe-image-container">
         {shoe.imageUrl && shoe.imageUrl.length > 0 && (
