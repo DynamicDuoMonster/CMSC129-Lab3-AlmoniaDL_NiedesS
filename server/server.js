@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const connectDB = require('./config/db');
 require("dotenv").config();
+const connectDB = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,12 +16,12 @@ app.use(cors({origin: 'http://localhost:3000'}));
 app.use(express.json());
 
 // Routes
-app.get('/', (req, res) => res.send("API is running...")); // test route
-
 app.use('/api/shoes',shoe_routes)
 app.use('/api/user', user_routes);
 
 app.get('/')
+
+app.get('/', (req, res) => res.send("API is running...")); // test route
 
 // Start server
 app.listen(PORT, () => {

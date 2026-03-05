@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const db = require('../config/db');
+const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
     username: {
@@ -8,7 +8,6 @@ const userSchema = new Schema({
         required: true,
         minlength: 3,
         unique: true
-
     },
     email: {
         type: String,
@@ -25,7 +24,9 @@ const userSchema = new Schema({
         default: 'customer'
     },
     resetpasswordtoken: String,
+}, { timestamps: true });
 
-})
+const PrimaryUser = db.primaryConn.model('User', userSchema);
+const BackupUser = db.backupConn.model('User', userSchema);
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = { PrimaryUser, BackupUser };

@@ -1,132 +1,101 @@
-const Shoe = require('../models/shoeModel')
-const mongoose = require('mongoose')
+const { PrimaryShoe, BackupShoe } = require('../models/shoeModel');
+const mongoose = require('mongoose');
 
-//shoe Image
-const multer = require('multer');
+const dualWrite = async (operation, data, id = null) => {
+    if (operation === 'create') {
+        return await Promise.all([
+            PrimaryShoe.create(data),
+            BackupShoe.create(data)
+        ]);
+    }
+    if (operation === 'update') {
+        return await Promise.all([
+            PrimaryShoe.findByIdAndUpdate(id, data, { new: true }),
+            BackupShoe.findByIdAndUpdate(id, data, { new: true })
+        ]);
+    }
+    if (operation === 'delete') {
+        return await Promise.all([
+            PrimaryShoe.findByIdAndDelete(id),
+            BackupShoe.findByIdAndDelete(id)
+        ]);
+    }
+};
 
-
-// get all shoes
 const getShoes = async (req, res) => {
-    const shoes = await Shoe.find({}).sort({createdAt: -1})
-
-    res.status(200).json(shoes)
-}
-
-// get single shoe by name
-const getShoeByName = async (req, res) => {
-    const { name } = req.query;
-    if (!name) return res.status(200).json([]);
-
     try {
-        const shoes = await Shoe.find({
-            shoe_name: { 
-                $regex: name,   // Look for this string...
-                $options: 'i'   // ...and ignore case (A vs a)
-            }
-        })
-        .limit(20) 
-        .lean();
-
+        const shoes = await PrimaryShoe.find({}).sort({ createdAt: -1 });
         res.status(200).json(shoes);
     } catch (error) {
-        res.status(500).json({ error: "Search failed" });
+        console.warn("⚠️ Atlas Down. Fetching from Azure...");
+        const backupShoes = await BackupShoe.find({}).sort({ createdAt: -1 });
+        res.status(200).json(backupShoes);
     }
-}
+};
 
-// get single shoe by id
+const getShoeByName = async (req, res) => {
+    const { q } = req.query;
+    const query = { $text: { $search: q } };
+    try {
+        const shoes = await PrimaryShoe.find(query);
+        res.status(200).json(shoes);
+    } catch (error) {
+        const backupShoes = await BackupShoe.find(query);
+        res.status(200).json(backupShoes);
+    }
+};
+
 const getShoeById = async (req, res) => {
     const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ error: 'Invalid ID' });
-    }
-
     try {
-        const shoe = await Shoe.findById(id);
-        if (!shoe) return res.status(404).json({ error: 'Shoe not found' });
-        
+        const shoe = await PrimaryShoe.findById(id);
+        if (!shoe) return res.status(404).json({ error: "Shoe not found" });
         res.status(200).json(shoe);
     } catch (error) {
-        res.status(500).json({ error: "Server error" });
+        const backupShoe = await BackupShoe.findById(id);
+        res.status(200).json(backupShoe);
     }
-}
+};
 
-// create new shoe
 const addShoe = async (req, res) => {
-    const { shoe_name, brand, color, price, category, gender } = req.body
-    
-    // Cloudinary puts the full URL in req.file.path
-    const imageUrls = req.files ? req.files.map(file => file.path) : [];
-
-    let colorArray = color;
-    if (typeof color === 'string') {
-        colorArray = color.split(',').map(c => c.trim()).filter(c => c !== "");
-    }
-
     try {
-        const shoe = await Shoe.create({ 
-            shoe_name, 
-            brand, 
-            color: colorArray, 
-            price: Number(price), 
-            imageUrl: imageUrls,
-            category,
-            gender
-        })
-        res.status(200).json(shoe)
-    } catch (error) {
-        res.status(400).json({ error: error.message })
-    }
-}
+        const _id = new mongoose.Types.ObjectId();
+        const imageUrl = req.files ? req.files.map(file => file.path) : [];
+        
+        const shoeData = { ...req.body, _id, imageUrl };
 
-// delete shoe
+        const [newShoe] = await dualWrite('create', shoeData);
+        res.status(201).json(newShoe);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 const deleteShoe = async (req, res) => {
-    const { id } = req.params
-
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(404).json({error: 'No such shoe'})
-    }
-
+    const { id } = req.params;
     try {
-        const shoe = await Shoe.findOneAndDelete({_id: id})
-
-        if (!shoe) {
-            return res.status(400).json({error: 'No such shoe'})
-        } 
-
-        res.status(200).json({shoe})
+        await dualWrite('delete', null, id);
+        res.status(200).json({ message: "Shoe deleted from all clusters" });
     } catch (error) {
-        console.error('Delete error:', error)  // 👈 this will show the real error in your backend terminal
-        res.status(500).json({error: error.message})
+        res.status(400).json({ error: error.message });
     }
-}
+};
 
-// update shoe
 const updateShoe = async (req, res) => {
-    const { id } = req.params
-
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(404).json({error: 'No such shoe'})
+    const { id } = req.params;
+    try {
+        const [updated] = await dualWrite('update', req.body, id);
+        res.status(200).json(updated);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-
-    const shoe = await Shoe.findOneAndUpdate(
-        {_id: id}, 
-        {...req.body},
-        { new: true }  // Return the updated document
-    )
-
-    if (!shoe) {
-        return res.status(400).json({error: 'No such shoe'})
-    }
-
-    res.status(200).json(shoe)
-}
+};
 
 module.exports = {
-    addShoe, 
-    getShoes, 
+    addShoe,
+    getShoes,
     getShoeByName,
     getShoeById,
     deleteShoe,
     updateShoe
-}
+};
