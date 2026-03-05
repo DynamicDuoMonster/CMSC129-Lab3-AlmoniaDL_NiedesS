@@ -54,3 +54,20 @@
   font-weight: bold;
   text-decoration: underline;
 }
+
+.login-footer {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.login-footer a {
+  color: #555;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.login-footer a:hover {
+  color: #000;
+  text-decoration: underline;
+}

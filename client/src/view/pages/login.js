@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Added Link
 import api from "../../api";
 import '../styles/login.css'
 
@@ -18,17 +18,19 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(response.data));
       if (response.data.role === 'admin') {
         navigate('/admin');
-      }else{
+      } else {
         navigate('/');
       }
     } catch (error) {
       setError(error.response?.data?.error || 'Login failed');
     }
   }
+
   return (
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2>Welcome to SoleSearch</h2>
+        
         <label>Email:</label>
         <input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
@@ -36,6 +38,11 @@ const Login = () => {
         <input type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
         <button type="submit">Log In</button>
+
+        <div className="login-footer">
+          <Link to="/forgot-password">Forgot Password?</Link>
+        </div>
+
         {error && <div className="error">{error}</div>}
       </form>
     </div>
