@@ -1,4 +1,4 @@
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import '../styles/navbar.css';
 import CartPanel from './CartPanel';
@@ -10,6 +10,12 @@ const Navbar = () => {
     const [cartOpen, setCartOpen] = useState(false);
     const [cartCount, setCartCount] = useState(0);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const isActiveFilter = (key, value) => {
+        const searchParams = new URLSearchParams(location.search);
+        return searchParams.get(key) === value;
+    };
 
     useEffect(() => {
         if (!user) return;
@@ -27,8 +33,8 @@ const Navbar = () => {
 
         fetchCartCount();
 
-        window.addEventListener('cart-updated', fetchCartCount)  // ← LISTEN, not dispatch
-        return () => window.removeEventListener('cart-updated', fetchCartCount)
+        window.addEventListener('cart-updated', fetchCartCount);
+        return () => window.removeEventListener('cart-updated', fetchCartCount);
     }, [user]);
 
     const handleLogout = () => {
@@ -41,14 +47,14 @@ const Navbar = () => {
         const query = e.target.value;
         setShoeName(query);
         if (query.length > 0) {
-            navigate(`/search?name=${query}`);
+            navigate(`/search?q=${query}`);
         } else {
             navigate('/');
         }
     };
 
     return (
-        <> 
+        <>
             <header className="navbar-header">
                 <div className="navbar-left">
                     <Link to="/" className="logo">
@@ -64,10 +70,30 @@ const Navbar = () => {
                 </div>
 
                 <nav className="nav-pill">
-                    <NavLink to="/Lifestyle" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Lifestyle</NavLink>
-                    <NavLink to="/Sports" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Sports</NavLink>
-                    <NavLink to="/Mens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Mens</NavLink>
-                    <NavLink to="/Womens" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>Womens</NavLink>
+                    <Link
+                        to="/search?category=Lifestyle"
+                        className={isActiveFilter('category', 'Lifestyle') ? "nav-item active" : "nav-item"}
+                    >
+                        Lifestyle
+                    </Link>
+                    <Link
+                        to="/search?category=Sports"
+                        className={isActiveFilter('category', 'Sports') ? "nav-item active" : "nav-item"}
+                    >
+                        Sports
+                    </Link>
+                    <Link
+                        to="/search?gender=Mens"
+                        className={isActiveFilter('gender', 'Mens') ? "nav-item active" : "nav-item"}
+                    >
+                        Mens
+                    </Link>
+                    <Link
+                        to="/search?gender=Womens"
+                        className={isActiveFilter('gender', 'Womens') ? "nav-item active" : "nav-item"}
+                    >
+                        Womens
+                    </Link>
                 </nav>
 
                 <div className="nav-right">
@@ -103,7 +129,7 @@ const Navbar = () => {
                 </div>
             </header>
 
-            <CartPanel isOpen={cartOpen} onClose={() => setCartOpen(false)} onCartUpdate={setCartCount} /> 
+            <CartPanel isOpen={cartOpen} onClose={() => setCartOpen(false)} onCartUpdate={setCartCount} />
         </>
     );
 };

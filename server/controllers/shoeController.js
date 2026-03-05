@@ -27,27 +27,33 @@ const getShoes = async (req, res) => {
         const shoes = await PrimaryShoe.find({ isDeleted: false }).sort({ createdAt: -1 });
         res.status(200).json(shoes);
     } catch (error) {
-        console.warn("⚠️ Atlas Down. Fetching from Azure...");
-        const backupShoes = await BackupShoe.find({ isDeleted: false }).sort({ createdAt: -1 });
-        res.status(200).json(backupShoes);
+        try {
+            console.warn("⚠️ Atlas Down. Fetching from Azure...");
+            const backupShoes = await BackupShoe.find({ isDeleted: false }).sort({ createdAt: -1 });
+            res.status(200).json(backupShoes);
+        } catch (backupError) {
+            res.status(500).json({ error: backupError.message });
+        }
     }
 };
 
 const getShoeByName = async (req, res) => {
-    const { name } = req.query;
-    if (!name) return res.status(200).json([]);
+    const { q, name, category, gender } = req.query;
 
-    const query = {
-        isDeleted: false,
-        shoe_name: { $regex: name, $options: 'i' }
-    };
+    let query = { isDeleted: false };
+
+    if (q) query.$text = { $search: q };
+    if (name) query.shoe_name = { $regex: name, $options: 'i' };
+    if (category) query.category = category;
+    if (gender) query.gender = gender;
 
     try {
-        const shoes = await PrimaryShoe.find(query).limit(20).lean();
+        const shoes = await PrimaryShoe.find(query).limit(20).sort({ createdAt: -1 }).lean();
         res.status(200).json(shoes);
     } catch (error) {
         try {
-            const backupShoes = await BackupShoe.find(query).limit(20).lean();
+            console.warn("⚠️ Sync Fallback: Fetching from Azure...");
+            const backupShoes = await BackupShoe.find(query).limit(20).sort({ createdAt: -1 }).lean();
             res.status(200).json(backupShoes);
         } catch (backupError) {
             res.status(500).json({ error: "Search failed" });
