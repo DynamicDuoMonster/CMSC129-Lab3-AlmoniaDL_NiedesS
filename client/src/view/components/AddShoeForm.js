@@ -73,15 +73,26 @@ const AddShoeForm = ({ onSuccess }) => {
         }}
       >
         {previews.length > 0 ? (
-          <div className="preview-grid">
-            {previews.map((url, index) => (
+        <div className="preview-grid">
+          {previews.map((url, index) => (
+            <div key={index} className="preview-item-wrapper">
               <img 
-                key={index} 
                 src={url} 
                 alt={`Preview ${index}`} 
                 className="image-preview-item" 
               />
-            ))}
+              <button
+                className="remove-image-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImages(prev => prev.filter((_, i) => i !== index));
+                  setPreviews(prev => prev.filter((_, i) => i !== index));
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
             <div className="add-more-overlay">+ Add More</div>
           </div>
         ) : (

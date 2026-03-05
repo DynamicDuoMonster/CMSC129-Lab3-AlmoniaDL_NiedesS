@@ -1,14 +1,10 @@
 const Shoe = require('../models/shoeModel')
 const mongoose = require('mongoose')
-
-//shoe Image
 const multer = require('multer');
-
 
 // get all shoes
 const getShoes = async (req, res) => {
-    const shoes = await Shoe.find({}).sort({createdAt: -1})
-
+    const shoes = await Shoe.find({ isDeleted: false }).sort({createdAt: -1})  // ← updated
     res.status(200).json(shoes)
 }
 
@@ -19,9 +15,10 @@ const getShoeByName = async (req, res) => {
 
     try {
         const shoes = await Shoe.find({
+            isDeleted: false,   // ← updated
             shoe_name: { 
-                $regex: name,   // Look for this string...
-                $options: 'i'   // ...and ignore case (A vs a)
+                $regex: name,
+                $options: 'i'
             }
         })
         .limit(20) 
@@ -55,7 +52,6 @@ const getShoeById = async (req, res) => {
 const addShoe = async (req, res) => {
     const { shoe_name, brand, color, price, category, gender } = req.body
     
-    // Cloudinary puts the full URL in req.file.path
     const imageUrls = req.files ? req.files.map(file => file.path) : [];
 
     let colorArray = color;
@@ -79,7 +75,30 @@ const addShoe = async (req, res) => {
     }
 }
 
-// delete shoe
+// SOFT DELETE - marks as deleted, recoverable
+const softDeleteShoe = async (req, res) => {
+    const { id } = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'No such shoe' })
+    }
+
+    try {
+        const shoe = await Shoe.findByIdAndUpdate(
+            id,
+            { isDeleted: true, deletedAt: new Date() },
+            { new: true }
+        )
+
+        if (!shoe) return res.status(404).json({ error: 'No such shoe' })
+
+        res.status(200).json({ message: 'Shoe moved to trash', shoe })
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
+// HARD DELETE - permanently removes it
 const deleteShoe = async (req, res) => {
     const { id } = req.params
 
@@ -94,10 +113,43 @@ const deleteShoe = async (req, res) => {
             return res.status(400).json({error: 'No such shoe'})
         } 
 
-        res.status(200).json({shoe})
+        res.status(200).json({ message: 'Shoe permanently deleted', shoe })
     } catch (error) {
-        console.error('Delete error:', error)  // 👈 this will show the real error in your backend terminal
+        console.error('Delete error:', error)
         res.status(500).json({error: error.message})
+    }
+}
+
+// RESTORE - undo a soft delete
+const restoreShoe = async (req, res) => {
+    const { id } = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'No such shoe' })
+    }
+
+    try {
+        const shoe = await Shoe.findByIdAndUpdate(
+            id,
+            { isDeleted: false, deletedAt: null },
+            { new: true }
+        )
+
+        if (!shoe) return res.status(404).json({ error: 'No such shoe' })
+
+        res.status(200).json({ message: 'Shoe restored', shoe })
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
+// GET TRASH - all soft deleted shoes
+const getTrashedShoes = async (req, res) => {
+    try {
+        const shoes = await Shoe.find({ isDeleted: true }).sort({ deletedAt: -1 })
+        res.status(200).json(shoes)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
     }
 }
 
@@ -112,7 +164,7 @@ const updateShoe = async (req, res) => {
     const shoe = await Shoe.findOneAndUpdate(
         {_id: id}, 
         {...req.body},
-        { new: true }  // Return the updated document
+        { new: true }
     )
 
     if (!shoe) {
@@ -127,6 +179,9 @@ module.exports = {
     getShoes, 
     getShoeByName,
     getShoeById,
+    softDeleteShoe,   // ← new
     deleteShoe,
+    restoreShoe,      // ← new
+    getTrashedShoes,  // ← new
     updateShoe
 }

@@ -44,7 +44,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this shoe?')) return;
     try {
-      await api.delete(`/api/shoes/${id}`);
+      await api.delete(`/api/shoes/${id}/soft`);
       setShoes(shoes.filter(shoe => shoe._id !== id));
     } catch (err) {
       console.error('Error deleting shoe:', err);
@@ -56,6 +56,7 @@ const AdminDashboard = () => {
       <div className="dashboard-header">
         <h2>All Products</h2>
         <div className="header-actions">
+          <button className="trash-btn" onClick={() => navigate('/trash')}>🗑 Trash</button>
           <button className="add-btn" onClick={() => setPanelOpen(true)}>+ Add Shoe</button>
           <button className="logout-btn" onClick={handleLogout}>Log Out</button>  {/* 👈 */}
         </div>

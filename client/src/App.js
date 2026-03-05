@@ -8,12 +8,13 @@ import Employee from './view/pages/dashboard';
 import SearchResults from './view/pages/search_results';
 import Signup from './view/pages/signup';
 import ShoeInfo from './view/pages/shoe_info'
+import Trash from './view/pages/trash';
 
 const Layout = () => {
   const location = useLocation();
   
   // Define paths where you DON'T want the navbar to show
-  const hideNavbarPaths = ['/login', '/admin', '/signup'];
+  const hideNavbarPaths = ['/login', '/admin', '/signup', '/trash'];
 
   return (
     <>
@@ -27,6 +28,7 @@ const Layout = () => {
           <Route path="/admin" element={<Employee />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/shoe/:id" element={<ShoeInfo />} />
+          <Route path="/trash" element={<Trash />} />
         </Routes>
       </div>
     </>

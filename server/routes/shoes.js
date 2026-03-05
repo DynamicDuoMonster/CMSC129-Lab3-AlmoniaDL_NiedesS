@@ -4,6 +4,7 @@ const multer = require('multer')
 const cloudinary = require('cloudinary').v2
 const { CloudinaryStorage } = require('multer-storage-cloudinary')
 const { requireAuth, requireAdmin } = require('../middleware/requireAuth')
+const Shoe = require('../models/shoeModel')
 
 const {
     addShoe, 
@@ -11,7 +12,10 @@ const {
     getShoeByName,
     getShoeById,
     deleteShoe,
-    updateShoe
+    updateShoe,
+    softDeleteShoe,   // ← add this
+    restoreShoe,      // ← add this
+    getTrashedShoes   // ← add this
 } = require('../controllers/shoeController')
 
 // Cloudinary config
@@ -33,14 +37,16 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage })
 
 // get all shoes
+router.get('/trash', requireAuth, requireAdmin, getTrashedShoes) 
 router.get('/', getShoes)
 router.get('/search', getShoeByName)
 router.get('/:id', getShoeById)
 
-
 // protected routes
 router.post('/', requireAuth, requireAdmin, upload.array('image', 5), addShoe)
+router.delete('/:id/soft', requireAuth, requireAdmin, softDeleteShoe) 
 router.delete('/:id', requireAuth, requireAdmin, deleteShoe)
+router.patch('/:id/restore', requireAuth, requireAdmin, restoreShoe)  
 router.patch('/:id', requireAuth, requireAdmin, updateShoe)
 
 module.exports = router

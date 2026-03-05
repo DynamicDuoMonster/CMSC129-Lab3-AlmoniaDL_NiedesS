@@ -8,7 +8,9 @@ const shoeSchema = new Schema({
     price: { type: Number, required: true, index: true }, // Index for price sorting/filtering
     imageUrl: { type: [String], required: true, default: [] },
     category: { type: String, index: true },
-    gender: { type: String, index: true }
+    gender: { type: String, index: true },
+    isDeleted: { type: Boolean, default: false }, 
+    deletedAt: { type: Date, default: null }
 }, { timestamps: true }) // Adds createdAt/updatedAt automatically
 
 // Create a compound text index for the search bar
