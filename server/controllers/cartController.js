@@ -1,28 +1,5 @@
 const { PrimaryCart, BackupCart } = require('../models/cartModel')
 
-// cartController.js
-const updateCartItem = async (req, res) => {
-    const { shoeId } = req.params;
-    const { quantity } = req.body;
-    try {
-        const cart = await PrimaryCart.findOne({ user: req.user._id });
-        const item = cart.items.find(i => i.shoe.toString() === shoeId);
-        if (!item) return res.status(404).json({ error: 'Item not found' });
-        item.quantity = quantity;
-        await Promise.all([
-            cart.save(),
-            BackupCart.findOneAndUpdate(
-                { user: req.user._id },
-                { items: cart.items },
-                { new: true, upsert: true }
-            )
-        ]);
-        const populated = await cart.populate('items.shoe');
-        res.status(200).json(populated);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
 // GET cart for logged in user
 const getCart = async (req, res) => {
     try {
@@ -78,7 +55,37 @@ const addToCart = async (req, res) => {
     }
 }
 
-// REMOVE item from cart
+// UPDATE quantity of a cart item
+const updateCartItem = async (req, res) => {
+    const { shoeId } = req.params
+    const { quantity } = req.body
+
+    try {
+        const cart = await PrimaryCart.findOne({ user: req.user._id })
+        if (!cart) return res.status(404).json({ error: 'Cart not found' })
+
+        const item = cart.items.find(i => i.shoe.toString() === shoeId)
+        if (!item) return res.status(404).json({ error: 'Item not found in cart' })
+
+        item.quantity = quantity
+
+        await Promise.all([
+            cart.save(),
+            BackupCart.findOneAndUpdate(
+                { user: req.user._id },
+                { items: cart.items },
+                { new: true, upsert: true }
+            )
+        ])
+
+        const populated = await cart.populate('items.shoe')
+        res.status(200).json(populated)
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+}
+
+// REMOVE single item from cart
 const removeFromCart = async (req, res) => {
     const { shoeId } = req.params
     try {
@@ -103,4 +110,25 @@ const removeFromCart = async (req, res) => {
     }
 }
 
-module.exports = { getCart, addToCart, removeFromCart, updateCartItem }
+// CLEAR entire cart (checkout)
+const clearCart = async (req, res) => {
+    try {
+        await Promise.all([
+            PrimaryCart.findOneAndUpdate(
+                { user: req.user._id },
+                { items: [] },
+                { new: true }
+            ),
+            BackupCart.findOneAndUpdate(
+                { user: req.user._id },
+                { items: [] },
+                { new: true }
+            )
+        ])
+        res.status(200).json({ message: 'Order placed and cart cleared' })
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+}
+
+module.exports = { getCart, addToCart, updateCartItem, removeFromCart, clearCart }

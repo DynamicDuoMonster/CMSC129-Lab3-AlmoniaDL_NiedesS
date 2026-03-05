@@ -47,6 +47,6 @@ router.post('/', requireAuth, requireAdmin, upload.array('image', 5), addShoe)
 router.delete('/:id/soft', requireAuth, requireAdmin, softDeleteShoe) 
 router.delete('/:id', requireAuth, requireAdmin, deleteShoe)
 router.patch('/:id/restore', requireAuth, requireAdmin, restoreShoe)  
-router.patch('/:id', requireAuth, requireAdmin, updateShoe)
+router.patch('/:id', requireAuth, requireAdmin, upload.array('image', 5), updateShoe)
 
 module.exports = router

@@ -57,7 +57,7 @@ const ShoeDetails = ({ shoe, disableClick }) => {
         <p className="tags">
           {[shoe.gender, shoe.category].filter(Boolean).join(' • ')}
         </p>
-        <p className="price">${shoe.price.toLocaleString()}</p>
+        <p className="price">P{shoe.price.toLocaleString()}</p>
       </div>
     </div>
   )

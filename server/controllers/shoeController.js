@@ -182,14 +182,44 @@ const updateShoe = async (req, res) => {
     }
 
     try {
-        const [updated] = await dualWrite('update', req.body, id);
+        // Capture all incoming potential keys
+        let { shoe_name, brand, price, color, category, gender, existingImages, imageUrl } = req.body;
+
+        // --- FIX: Normalize the incoming images ---
+        // We check for either 'existingImages' (from FormData) or 'imageUrl' (from JSON)
+        const imagesToKeep = existingImages || imageUrl;
+        
+        let keptImages = [];
+        if (typeof imagesToKeep === 'string') {
+            try { keptImages = JSON.parse(imagesToKeep); } catch { keptImages = []; }
+        } else if (Array.isArray(imagesToKeep)) {
+            keptImages = imagesToKeep;
+        }
+
+        // Merge with new files
+        const newImagePaths = req.files ? req.files.map(f => f.path) : [];
+        const finalImageArray = [...keptImages, ...newImagePaths];
+
+        const updateData = {
+            shoe_name,
+            brand,
+            price: Number(price),
+            color,
+            category,
+            gender,
+            imageUrl: finalImageArray
+        };
+
+        const [updated] = await dualWrite('update', updateData, id);
+        
         if (!updated) return res.status(404).json({ error: 'No such shoe' });
         res.status(200).json(updated);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+        
+    } catch (err) {
+        console.error('Error updating shoe:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };
-
 module.exports = {
     addShoe,
     getShoes,
