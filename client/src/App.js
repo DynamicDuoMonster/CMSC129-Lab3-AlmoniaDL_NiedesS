@@ -9,12 +9,13 @@ import SearchResults from './view/pages/search_results';
 import Signup from './view/pages/signup';
 import ShoeInfo from './view/pages/shoe_info'
 import Trash from './view/pages/trash';
+import ForgotPassword from './view/pages/forgotpassword';
 
 const Layout = () => {
   const location = useLocation();
   
   // Define paths where you DON'T want the navbar to show
-  const hideNavbarPaths = ['/login', '/admin', '/signup', '/trash'];
+  const hideNavbarPaths = ['/login', '/admin', '/signup', '/trash', '/forgot-password'];
 
   return (
     <>
@@ -29,6 +30,7 @@ const Layout = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/shoe/:id" element={<ShoeInfo />} />
           <Route path="/trash" element={<Trash />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </div>
     </>
