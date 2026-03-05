@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Added Link
+import { useNavigate, Link, replace } from 'react-router-dom'; // Added Link
 import api from "../../api";
 import '../styles/login.css'
 
@@ -17,9 +17,9 @@ const Login = () => {
       const response = await api.post('/api/user/login', { email, password});
       localStorage.setItem('user', JSON.stringify(response.data));
       if (response.data.role === 'admin') {
-        navigate('/admin');
+        navigate('/admin', {replace: true});
       } else {
-        navigate('/');
+        navigate('/', {replace: true});
       }
     } catch (error) {
       setError(error.response?.data?.error || 'Login failed');

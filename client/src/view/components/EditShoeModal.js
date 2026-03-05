@@ -172,8 +172,7 @@ const EditShoeModal = ({ shoe, onSuccess, onClose }) => {
               <label>Category</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="">Select...</option>
-                <option value="Running">Running</option>
-                <option value="Basketball">Basketball</option>
+                <option value="Sports">Sports</option>
                 <option value="Lifestyle">Lifestyle</option>
               </select>
             </div>

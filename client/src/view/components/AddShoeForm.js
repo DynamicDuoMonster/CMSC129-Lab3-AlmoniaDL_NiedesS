@@ -122,8 +122,7 @@ const AddShoeForm = ({ onSuccess }) => {
       <div className="select-row">
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">Category</option>
-          <option value="Running">Running</option>
-          <option value="Basketball">Basketball</option>
+          <option value="Sports">Sports</option>
           <option value="Lifestyle">Lifestyle</option>
         </select>
         <select value={gender} onChange={(e) => setGender(e.target.value)}>

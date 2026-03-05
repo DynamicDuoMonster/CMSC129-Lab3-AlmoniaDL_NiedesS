@@ -68,7 +68,7 @@ const ShoeInfo = () => {
           <h1 className="shoe-title">{shoe.shoe_name}</h1>
           <p className="shoe-sub">{shoe.gender}'s {shoe.category}</p>
 
-          <div className="price-tag">${shoe.price}</div>
+          <div className="price-tag">P{shoe.price}</div>
 
           <div className="details-section">
             <h4>Available Colors</h4>
