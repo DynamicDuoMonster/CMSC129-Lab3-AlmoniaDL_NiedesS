@@ -1,16 +1,12 @@
 const mongoose = require("mongoose");
 
+const primaryConn = mongoose.createConnection(process.env.MONGODB_URI);
+const backupConn = mongoose.createConnection(process.env.MONGODB_URI_BACKUP);
+
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("MongoDB Atlas connected");
-  } catch (error) {
-    console.error("MongoDB Atlas connection error:", error);
-    process.exit(1);
-  }
+    console.log("Dual-Database Sync Engine Initialized");
 };
 
 module.exports = connectDB;
+module.exports.primaryConn = primaryConn;
+module.exports.backupConn = backupConn;

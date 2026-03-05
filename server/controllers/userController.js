@@ -1,67 +1,88 @@
-const User = require('../models/userModel')
-const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+const { PrimaryUser, BackupUser } = require('../models/userModel');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const signupUser = async (req, res) => {
-    const { username, email, password} = req.body
+    const { username, email, password } = req.body;
 
-    try{
-        const usernameExists = await User.findOne({ username })
-        if (usernameExists) return res.status(400).json({ error: 'Username already exists' })
-        
-        const emailExists = await User.findOne({ email })
-        if (emailExists) return res.status(400).json({ error: 'Email already exists' })
+    try {
+        // If Primary is down, we check Backup instead
+        let usernameExists, emailExists;
+        try {
+            usernameExists = await PrimaryUser.findOne({ username });
+            emailExists = await PrimaryUser.findOne({ email });
+        } catch (dbError) {
+            usernameExists = await BackupUser.findOne({ username });
+            emailExists = await BackupUser.findOne({ email });
+        }
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
+        if (usernameExists) return res.status(400).json({ error: 'Username already exists' });
+        if (emailExists) return res.status(400).json({ error: 'Email already exists' });
 
-        const user = await User.create({
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const _id = new mongoose.Types.ObjectId();
+
+        const userData = {
+            _id,
             username,
             email,
             password: hashedPassword,
             role: 'customer'
-        })
+        };
 
-        const token = jwt.sign({_id: user._id}, process.env.SECRET, { expiresIn: '3d'})
+        const [user] = await Promise.all([
+            PrimaryUser.create(userData),
+            BackupUser.create(userData)
+        ]);
+
+        const token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '3d' });
 
         res.status(200).json({ 
             username: user.username, 
             email: user.email, 
             token, 
             role: user.role 
-        })
+        });
         
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(400).json({ error: error.message });
     }
+};
 
-}
 const loginUser = async (req, res) => {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
     try {
-        // check if user exists
-        const user = await User.findOne({ email })
-        if (!user) return res.status(400).json({ error: 'Incorrect email' })
+        let user;
+        try {
+            // Try Primary first
+            user = await PrimaryUser.findOne({ email });
+        } catch (error) {
+            // Fallback to Backup
+            console.warn("Login Primary Failed. Using Backup...");
+            user = await BackupUser.findOne({ email });
+        }
 
-        // check if password matches
-        const match = await bcrypt.compare(password, user.password)
-        if (!match) return res.status(400).json({ error: 'Incorrect password' })
+        if (!user) return res.status(400).json({ error: 'Incorrect email' });
 
-        // create token
-        const token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '3d' })
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.status(400).json({ error: 'Incorrect password' });
+
+        const token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '3d' });
 
         res.status(200).json({ 
             username: user.username, 
             email, 
             token, 
-            role: user.role  // returns role so frontend knows if admin or customer
-        })
+            role: user.role 
+        });
 
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(400).json({ error: error.message });
     }
-}
+};
 
-module.exports = {signupUser, loginUser}
+module.exports = { signupUser, loginUser };
