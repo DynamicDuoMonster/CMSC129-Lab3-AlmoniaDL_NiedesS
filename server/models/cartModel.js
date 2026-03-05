@@ -1,5 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const db = require('../config/db');
+const Schema = mongoose.Schema;
 
 const cartSchema = new Schema({
     user: {
@@ -24,4 +25,7 @@ const cartSchema = new Schema({
 
 cartSchema.index({ user: 1 }, { unique: true })
 
-module.exports = mongoose.model('Cart', cartSchema)
+const PrimaryCart = db.primaryConn.model('Cart', cartSchema);
+const BackupCart = db.backupConn.model('Cart', cartSchema);
+
+module.exports = { PrimaryCart, BackupCart };

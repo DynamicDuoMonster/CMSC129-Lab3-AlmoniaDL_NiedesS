@@ -24,36 +24,56 @@ const dualWrite = async (operation, data, id = null) => {
 
 const getShoes = async (req, res) => {
     try {
-        const shoes = await PrimaryShoe.find({}).sort({ createdAt: -1 });
+        const shoes = await PrimaryShoe.find({ isDeleted: false }).sort({ createdAt: -1 });
         res.status(200).json(shoes);
     } catch (error) {
         console.warn("⚠️ Atlas Down. Fetching from Azure...");
-        const backupShoes = await BackupShoe.find({}).sort({ createdAt: -1 });
+        const backupShoes = await BackupShoe.find({ isDeleted: false }).sort({ createdAt: -1 });
         res.status(200).json(backupShoes);
     }
 };
 
 const getShoeByName = async (req, res) => {
-    const { q } = req.query;
-    const query = { $text: { $search: q } };
+    const { name } = req.query;
+    if (!name) return res.status(200).json([]);
+
+    const query = {
+        isDeleted: false,
+        shoe_name: { $regex: name, $options: 'i' }
+    };
+
     try {
-        const shoes = await PrimaryShoe.find(query);
+        const shoes = await PrimaryShoe.find(query).limit(20).lean();
         res.status(200).json(shoes);
     } catch (error) {
-        const backupShoes = await BackupShoe.find(query);
-        res.status(200).json(backupShoes);
+        try {
+            const backupShoes = await BackupShoe.find(query).limit(20).lean();
+            res.status(200).json(backupShoes);
+        } catch (backupError) {
+            res.status(500).json({ error: "Search failed" });
+        }
     }
 };
 
 const getShoeById = async (req, res) => {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'Invalid ID' });
+    }
+
     try {
         const shoe = await PrimaryShoe.findById(id);
         if (!shoe) return res.status(404).json({ error: "Shoe not found" });
         res.status(200).json(shoe);
     } catch (error) {
-        const backupShoe = await BackupShoe.findById(id);
-        res.status(200).json(backupShoe);
+        try {
+            const backupShoe = await BackupShoe.findById(id);
+            if (!backupShoe) return res.status(404).json({ error: "Shoe not found" });
+            res.status(200).json(backupShoe);
+        } catch (backupError) {
+            res.status(500).json({ error: "Server error" });
+        }
     }
 };
 
@@ -61,8 +81,13 @@ const addShoe = async (req, res) => {
     try {
         const _id = new mongoose.Types.ObjectId();
         const imageUrl = req.files ? req.files.map(file => file.path) : [];
-        
-        const shoeData = { ...req.body, _id, imageUrl };
+
+        let { color, price, ...rest } = req.body;
+        if (typeof color === 'string') {
+            color = color.split(',').map(c => c.trim()).filter(c => c !== '');
+        }
+
+        const shoeData = { ...rest, _id, color, price: Number(price), imageUrl };
 
         const [newShoe] = await dualWrite('create', shoeData);
         res.status(201).json(newShoe);
@@ -71,20 +96,88 @@ const addShoe = async (req, res) => {
     }
 };
 
+// SOFT DELETE - marks as deleted, recoverable
+const softDeleteShoe = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'No such shoe' });
+    }
+
+    try {
+        const updateData = { isDeleted: true, deletedAt: new Date() };
+        const [shoe] = await dualWrite('update', updateData, id);
+
+        if (!shoe) return res.status(404).json({ error: 'No such shoe' });
+
+        res.status(200).json({ message: 'Shoe moved to trash', shoe });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// HARD DELETE - permanently removes from both clusters
 const deleteShoe = async (req, res) => {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'No such shoe' });
+    }
+
     try {
         await dualWrite('delete', null, id);
-        res.status(200).json({ message: "Shoe deleted from all clusters" });
+        res.status(200).json({ message: "Shoe permanently deleted from all clusters" });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
+// RESTORE - undo a soft delete across both clusters
+const restoreShoe = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'No such shoe' });
+    }
+
+    try {
+        const updateData = { isDeleted: false, deletedAt: null };
+        const [shoe] = await dualWrite('update', updateData, id);
+
+        if (!shoe) return res.status(404).json({ error: 'No such shoe' });
+
+        res.status(200).json({ message: 'Shoe restored', shoe });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET TRASH - all soft deleted shoes
+const getTrashedShoes = async (req, res) => {
+    try {
+        const shoes = await PrimaryShoe.find({ isDeleted: true }).sort({ deletedAt: -1 });
+        res.status(200).json(shoes);
+    } catch (error) {
+        try {
+            console.warn("⚠️ Atlas Down. Fetching trash from Azure...");
+            const backupShoes = await BackupShoe.find({ isDeleted: true }).sort({ deletedAt: -1 });
+            res.status(200).json(backupShoes);
+        } catch (backupError) {
+            res.status(500).json({ error: backupError.message });
+        }
+    }
+};
+
 const updateShoe = async (req, res) => {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: 'No such shoe' });
+    }
+
     try {
         const [updated] = await dualWrite('update', req.body, id);
+        if (!updated) return res.status(404).json({ error: 'No such shoe' });
         res.status(200).json(updated);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -96,9 +189,9 @@ module.exports = {
     getShoes,
     getShoeByName,
     getShoeById,
-    softDeleteShoe,   // ← new
+    softDeleteShoe,
     deleteShoe,
-    restoreShoe,      // ← new
-    getTrashedShoes,  // ← new
+    restoreShoe,
+    getTrashedShoes,
     updateShoe
 };

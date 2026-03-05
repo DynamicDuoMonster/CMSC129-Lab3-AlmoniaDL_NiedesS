@@ -4,13 +4,15 @@ const Schema = mongoose.Schema;
 
 const shoeSchema = new Schema({
     shoe_name: { type: String, required: true, trim: true },
-    brand: { type: String, required: true, index: true },
+    brand: { type: String, required: true, index: true }, // Index for fast filtering by brand
     color: { type: [String], required: true },
-    price: { type: Number, required: true, index: true },
+    price: { type: Number, required: true, index: true }, // Index for price sorting/filtering
     imageUrl: { type: [String], required: true, default: [] },
     category: { type: String, index: true },
-    gender: { type: String, index: true }
-}, { timestamps: true });
+    gender: { type: String, index: true },
+    isDeleted: { type: Boolean, default: false }, 
+    deletedAt: { type: Date, default: null }
+}, { timestamps: true }) // Adds createdAt/updatedAt automatically
 
 shoeSchema.index({
     shoe_name: 'text',

@@ -1,13 +1,20 @@
-const Cart = require('../models/cartModel')
+const { PrimaryCart, BackupCart } = require('../models/cartModel')
 
 // GET cart for logged in user
 const getCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ user: req.user._id }).populate('items.shoe')
+        const cart = await PrimaryCart.findOne({ user: req.user._id }).populate('items.shoe')
         if (!cart) return res.status(200).json({ items: [] })
         res.status(200).json(cart)
     } catch (err) {
-        res.status(500).json({ error: err.message })
+        try {
+            console.warn('⚠️ Primary down. Fetching cart from backup...')
+            const cart = await BackupCart.findOne({ user: req.user._id }).populate('items.shoe')
+            if (!cart) return res.status(200).json({ items: [] })
+            res.status(200).json(cart)
+        } catch (backupErr) {
+            res.status(500).json({ error: backupErr.message })
+        }
     }
 }
 
@@ -15,19 +22,30 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
     const { shoeId } = req.body
     try {
-        let cart = await Cart.findOne({ user: req.user._id })
+        let cart = await PrimaryCart.findOne({ user: req.user._id })
 
         if (!cart) {
-            // create new cart if user has none
-            cart = await Cart.create({ user: req.user._id, items: [{ shoe: shoeId }] })
+            const newCart = { user: req.user._id, items: [{ shoe: shoeId }] }
+            await Promise.all([
+                PrimaryCart.create(newCart),
+                BackupCart.create(newCart)
+            ])
+            cart = await PrimaryCart.findOne({ user: req.user._id })
         } else {
             const existingItem = cart.items.find(item => item.shoe.toString() === shoeId)
             if (existingItem) {
-                existingItem.quantity += 1   // 👈 increment if already in cart
+                existingItem.quantity += 1
             } else {
-                cart.items.push({ shoe: shoeId })  // 👈 add new item
+                cart.items.push({ shoe: shoeId })
             }
-            await cart.save()
+            await Promise.all([
+                cart.save(),
+                BackupCart.findOneAndUpdate(
+                    { user: req.user._id },
+                    { items: cart.items },
+                    { new: true, upsert: true }
+                )
+            ])
         }
 
         const populated = await cart.populate('items.shoe')
@@ -41,11 +59,19 @@ const addToCart = async (req, res) => {
 const removeFromCart = async (req, res) => {
     const { shoeId } = req.params
     try {
-        const cart = await Cart.findOne({ user: req.user._id })
+        const cart = await PrimaryCart.findOne({ user: req.user._id })
         if (!cart) return res.status(404).json({ error: 'Cart not found' })
 
         cart.items = cart.items.filter(item => item.shoe.toString() !== shoeId)
-        await cart.save()
+
+        await Promise.all([
+            cart.save(),
+            BackupCart.findOneAndUpdate(
+                { user: req.user._id },
+                { items: cart.items },
+                { new: true, upsert: true }
+            )
+        ])
 
         const populated = await cart.populate('items.shoe')
         res.status(200).json(populated)

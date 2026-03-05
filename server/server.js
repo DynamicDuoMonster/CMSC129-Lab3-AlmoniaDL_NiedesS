@@ -17,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/shoes',shoe_routes)
+app.use('/api/cart', cart_routes)
 app.use('/api/user', user_routes);
 
 app.get('/')
