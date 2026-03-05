@@ -48,5 +48,5 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+.eslintcache
 
-/uploads

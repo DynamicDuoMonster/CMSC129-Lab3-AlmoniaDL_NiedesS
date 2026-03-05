@@ -1,0 +1,105 @@
+.shoe-details {
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 15px;
+  width: 100%; 
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.shoe-details:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+}
+
+.shoe-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px; 
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.shoe-image-container img {
+
+  width: 90%;
+  height: 90%;
+  object-fit: contain; 
+  /* mix-blend-mode: screen is cool, but ensure your images have black backgrounds! */
+}
+
+.shoe-info {
+  padding: 15px;    
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;  
+  gap: 4px; 
+}
+
+.brand-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.shoe-info h4 {
+  margin: 0;
+  font-size: 1rem; /* Smaller for the 250px card */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds '...' if the name is too long */
+}
+
+.color {
+  font-size: 0.9rem;
+  color: #b3b3b3;
+  margin-top: 5px;
+}
+
+.price {
+  margin-top: auto; /* Pushes price to the bottom */
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  border-top: 1px solid #222;
+  padding-top: 5px;
+}
+
+.image-dots {
+  position: absolute;
+  bottom: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 10;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+.fade-in {
+  animation: imgFade 0.4s ease-in-out;
+}
+
+@keyframes imgFade {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}

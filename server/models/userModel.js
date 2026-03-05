@@ -1,11 +1,13 @@
-const mongoose = require('mongoose')
-
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const db = require('../config/db');
+const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
     username: {
         type: String,
-        required: true
+        required: true,
+        minlength: 3,
+        unique: true
     },
     email: {
         type: String,
@@ -17,10 +19,14 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        required: true
+        required: true,
+        enum: ['admin', 'customer'],
+        default: 'customer'
     },
     resetpasswordtoken: String,
-    
-})
+}, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema)
+const PrimaryUser = db.primaryConn.model('User', userSchema);
+const BackupUser = db.backupConn.model('User', userSchema);
+
+module.exports = { PrimaryUser, BackupUser };

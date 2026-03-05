@@ -1,34 +1,52 @@
 const express = require('express')
 const router = express.Router()
-const multer = require('multer')       
-const path = require('path')           
+const multer = require('multer')
+const cloudinary = require('cloudinary').v2
+const { CloudinaryStorage } = require('multer-storage-cloudinary')
+const { requireAuth, requireAdmin } = require('../middleware/requireAuth')
+const Shoe = require('../models/shoeModel')
+
 const {
-    addShoe, getShoes, getShoe
+    addShoe, 
+    getShoes, 
+    getShoeByName,
+    getShoeById,
+    deleteShoe,
+    updateShoe,
+    softDeleteShoe,   // ← add this
+    restoreShoe,      // ← add this
+    getTrashedShoes   // ← add this
 } = require('../controllers/shoeController')
 
-// Multer config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/shoes/'),
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname)
-        cb(null, `shoe-${Date.now()}${ext}`)
+// Cloudinary config
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
+
+// Cloudinary storage
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: 'shoe-locker',
+        allowed_formats: ['jpg', 'png', 'webp']
     }
 })
+
 const upload = multer({ storage })
 
 // get all shoes
+router.get('/trash', requireAuth, requireAdmin, getTrashedShoes) 
 router.get('/', getShoes)
+router.get('/search', getShoeByName)
+router.get('/:id', getShoeById)
 
-router.get('/:id', getShoe)
-
-router.post('/', upload.single('image'), addShoe)  // ← just one post route
-
-router.delete('/:id', (req, res) => {
-    res.json({mssg: 'DELETE single shoe info'})
-})
-
-router.patch('/:id', (req, res) => {
-    res.json({mssg: 'UPDATE single shoe info'})
-})
+// protected routes
+router.post('/', requireAuth, requireAdmin, upload.array('image', 5), addShoe)
+router.delete('/:id/soft', requireAuth, requireAdmin, softDeleteShoe) 
+router.delete('/:id', requireAuth, requireAdmin, deleteShoe)
+router.patch('/:id/restore', requireAuth, requireAdmin, restoreShoe)  
+router.patch('/:id', requireAuth, requireAdmin, upload.array('image', 5), updateShoe)
 
 module.exports = router
