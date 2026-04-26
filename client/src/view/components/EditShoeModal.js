@@ -182,7 +182,7 @@ const EditShoeModal = ({ shoe, onSuccess, onClose }) => {
                 <option value="">Select...</option>
                 <option value="Mens">Mens</option>
                 <option value="Womens">Womens</option>
-                <option value="Kids">Kids</option>
+                <option value="Unisex">Unisex</option>
               </select>
             </div>
           </div>

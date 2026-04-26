@@ -129,7 +129,7 @@ const AddShoeForm = ({ onSuccess }) => {
           <option value="">Gender</option>
           <option value="Mens">Mens</option>
           <option value="Womens">Womens</option>
-          <option value="Kids">Kids</option>
+          <option value="Unisex">Unisex</option>
         </select>
       </div>
 

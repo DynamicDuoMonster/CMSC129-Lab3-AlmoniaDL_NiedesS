@@ -1,38 +1,55 @@
-import { useEffect, useState } from "react"
+/**
+ * Home.js  (updated)
+ * Main page — shoe grid + floating SoleBot chat widget.
+ *
+ * The widget calls onInventoryChange() after any successful CRUD
+ * operation so the shoe list re-fetches automatically.
+ */
+
+import { useEffect, useState, useCallback } from "react";
 import api from "../../api";
-import '../styles/shoeDisplay.css'
-import '../styles/shoeGrid.css'
+import "../styles/shoeDisplay.css";
+import "../styles/shoeGrid.css";
 
-
-// components
-import ShoeDetails from '../components/ShoeDetails'
+import ShoeDetails from "../components/ShoeDetails";
+import SoleBotWidget from "../components/SoleBotWidget";
 
 const Home = () => {
-    const [shoes, setShoes] = useState(null)
+  const [shoes, setShoes] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchShoes = async () => {
-            try {
-                const response = await api.get('/api/shoes') 
+  const fetchShoes = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/api/shoes");
+      setShoes(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching shoes:", err);
+      setError("Failed to load shoes. Please refresh.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-                setShoes(response.data) 
-            } catch (error) {
-                console.error("Error fetching shoes:", error)
-            }
-        }
+  useEffect(() => {
+    fetchShoes();
+  }, [fetchShoes]);
 
-        fetchShoes()
-    }, [])
+  return (
+    <div className="shoe-display">
+      <div className="shoes">
+        {loading && <p style={{ padding: "2rem", color: "var(--color-text-secondary)" }}>Loading...</p>}
+        {error && <p style={{ padding: "2rem", color: "var(--color-text-danger)" }}>{error}</p>}
+        {shoes &&
+          shoes.map((shoe) => <ShoeDetails key={shoe._id} shoe={shoe} />)}
+      </div>
 
-    return (
-        <div className="shoe-display">
-            <div className="shoes">
-                {shoes && shoes.map((shoe) => (
-                    <ShoeDetails key={shoe._id} shoe={shoe}/>
-                ))}
-            </div>
-        </div>
-    )
-}
+      {/* Floating AI chat widget — stays on top, out of the grid flow */}
+      <SoleBotWidget onInventoryChange={fetchShoes} />
+    </div>
+  );
+};
 
-export default Home
+export default Home;

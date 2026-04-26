@@ -1,0 +1,88 @@
+/* ── AdminSearchBar — dark theme ────────────────────────────── */
+.asb-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #1a1a1a;
+  border: 1.5px solid #333;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 38px;
+  width: 340px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.asb-wrapper.asb-focused {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+}
+
+/* Search icon */
+.asb-icon-search {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: #666;
+  transition: color 0.18s ease;
+}
+.asb-focused .asb-icon-search {
+  color: #aaa;
+}
+
+/* Input */
+.asb-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.855rem;
+  font-family: inherit;
+  color: #f0f0f0;
+  min-width: 0;
+}
+.asb-input::placeholder {
+  color: #555;
+}
+
+/* Result count badge */
+.asb-count {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #aaa;
+  background: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Clear button */
+.asb-clear {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2e2e2e;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease;
+}
+.asb-clear:hover {
+  background: #c0392b;
+}
+.asb-clear svg {
+  width: 10px;
+  height: 10px;
+  color: #aaa;
+  transition: color 0.15s ease;
+}
+.asb-clear:hover svg {
+  color: #fff;
+}
