@@ -70,6 +70,86 @@ body {
   align-items: center;
 }
 
+/* ── FILTER PILLS ── */
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Each group (category / gender) sits side by side */
+.filter-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Thin vertical divider between the two groups */
+.filter-divider {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: #333;
+  margin: 0 4px;
+}
+
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #333;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.filter-pill:hover {
+  border-color: #666;
+  color: #fff;
+}
+
+.filter-pill.active {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+  font-weight: 600;
+}
+
+.filter-pill.active:hover {
+  background: #ddd;
+  border-color: #ddd;
+}
+
+.pill-clear {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.filter-clear-btn {
+  padding: 7px 14px;
+  background: transparent;
+  color: #ff3b3b;
+  border: 1px solid #ff3b3b44;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.filter-clear-btn:hover {
+  background: #ff3b3b22;
+  border-color: #ff3b3b;
+}
+
 .logout-btn {
   padding: 10px 20px;
   background: transparent;

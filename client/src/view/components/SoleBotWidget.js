@@ -1,17 +1,4 @@
-/**
- * SoleBotWidget.jsx
- * Floating AI chat widget for SoleSearch.
- * Drop this into your Home page (or any page) — it floats bottom-right,
- * calls your existing /api/chat endpoints, and reflects CRUD changes
- * by firing an optional onInventoryChange() callback so the parent
- * page can re-fetch its shoe list.
- *
- * Usage in Home.js:
- *   import SoleBotWidget from '../components/SoleBotWidget'
- *   <SoleBotWidget onInventoryChange={() => fetchShoes()} />
- */
-
-import api from "../../api"; // your existing axios instance
+import api from "../../api";
 const { useState, useEffect, useRef, useCallback } = require("react");
 
 // ─────────────────────────────────────────────────────────────────────────────
