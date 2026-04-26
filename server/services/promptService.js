@@ -27,11 +27,18 @@ You are SoleBot, an expert sneaker assistant and inventory manager for SoleSearc
 - Always track what you just showed the user — use it for follow-up questions
 - If you're unsure what the user is referring to, ask ONE clarifying question
 
+## DESTRUCTIVE OPERATIONS
+- **deleteShoe** — soft delete (moves to trash, reversible). Admin-only, executes immediately after you identify the shoe — no confirmation prompt needed.
+- **hardDeleteShoe** — permanent delete (irreversible). Admin-only, ALWAYS confirm before executing.
+- **bulkDeleteShoes** — permanent bulk delete (irreversible). Admin-only, ALWAYS confirm before executing.
+- **updateShoe / bulkUpdateShoes** — Admin-only, ALWAYS confirm before executing.
+
 ## TOOL USAGE RULES
 - ALWAYS use tools to fetch or modify data — never make up inventory data
-- For destructive operations (update, delete), you MUST confirm with the user BEFORE calling the tool
+- For hard deletes and updates, you MUST confirm with the user BEFORE calling the tool
   - Ask: "Just to confirm — you want to [describe the action] for [describe the items]? Reply 'yes' to proceed."
   - Only call the destructive tool AFTER the user explicitly confirms with "yes", "confirm", "proceed", or similar
+- **deleteShoe** (soft delete) does NOT need a confirmation prompt — just do it and report back
 - After any successful CRUD operation, summarize what changed
 
 ## DATA SCHEMA (shoe records)
@@ -58,8 +65,11 @@ User: "Show me all Nike shoes"
 User: "Which of those are under $150?"
 → Filter the previously returned Nike list by price < 150
 
-User: "Delete all shoes under $50"
-→ DO NOT call delete tool yet. Ask for confirmation first.
+User: "Delete the Air Jordan 1"
+→ Call findShoesByName to resolve the name, then call deleteShoe (soft delete — no confirmation needed). Report it's been moved to trash.
+
+User: "Permanently delete all shoes under $50"
+→ DO NOT call hardDelete/bulkDelete yet. Ask for confirmation first.
 
 User: "yes"
 → Now call bulkDeleteShoes with the confirmed filter
@@ -197,21 +207,46 @@ const TOOLS = [
         }
       },
 
-      // ── DELETE ────────────────────────────────────────────────────────────
       {
-        name: "deleteShoe",
-        description: "Delete a single shoe by ID. Only call AFTER explicit user confirmation.",
+        name: "findShoesByName",
+        description: "Search for shoes by name fragment to resolve a name to an ID before a single-shoe operation. Use this when the user refers to a shoe by name and you need its ID.",
         parameters: {
           type: "OBJECT",
           properties: {
-            id: { type: "STRING", description: "MongoDB _id of the shoe to delete" }
+            name: { type: "STRING", description: "Shoe name or partial name to look up (e.g., 'Air Jordan 1', 'Yeezy Boost')" }
           },
-          required: ["id"]
+          required: ["name"]
+        }
+      },
+
+      // ── DELETE ────────────────────────────────────────────────────────────
+      {
+        name: "deleteShoe",
+        description: "Soft-delete a shoe by ID — moves it to trash (isDeleted: true). Reversible. Admin-only but executes immediately without a confirmation prompt.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            id:   { type: "STRING", description: "MongoDB _id of the shoe to soft-delete" },
+            name: { type: "STRING", description: "Shoe name (alternative to id — will be resolved automatically)" }
+          },
+          required: []
+        }
+      },
+      {
+        name: "hardDeleteShoe",
+        description: "Permanently delete a single shoe by ID. IRREVERSIBLE — only call AFTER explicit user confirmation.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            id:   { type: "STRING", description: "MongoDB _id of the shoe to permanently delete" },
+            name: { type: "STRING", description: "Shoe name (alternative to id — will be resolved automatically)" }
+          },
+          required: []
         }
       },
       {
         name: "bulkDeleteShoes",
-        description: "Delete multiple shoes matching filter criteria. EXTREMELY destructive — only call after explicit user confirmation.",
+        description: "Permanently delete multiple shoes matching filter criteria or a list of IDs. IRREVERSIBLE — only call AFTER explicit user confirmation.",
         parameters: {
           type: "OBJECT",
           properties: {

@@ -65,7 +65,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const response = await processMessage(userId, trimmed);
+    const response = await processMessage(userId, trimmed, req.user);
 
     return res.status(200).json({ success: true, ...response });
 

@@ -70,7 +70,7 @@ const Trash = () => {
                 />
               )}
               <h3 className="trash-card-name">{shoe.shoe_name}</h3>
-              <p className="trash-card-price">${shoe.price}</p>
+              <p className="trash-card-price">P{shoe.price}</p>
               <button className="btn-restore" onClick={() => handleRestore(shoe._id)}>
                 Restore
               </button>

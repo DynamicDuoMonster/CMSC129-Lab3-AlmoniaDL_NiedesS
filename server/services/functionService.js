@@ -245,9 +245,50 @@ const bulkUpdateShoes = async ({ filter, updates }) => {
 };
 
 /**
- * deleteShoe — hard-delete one shoe by ID
+ * findShoesByName — search shoes by name fragment for name→ID resolution
+ * Used by aiService before destructive single-shoe operations.
+ */
+const findShoesByName = async ({ name }) => {
+  const Shoe = getShoeModel();
+  const regex = new RegExp(name, 'i');
+  const results = await Shoe.find({
+    isDeleted: { $ne: true },
+    shoe_name: regex
+  }).limit(10).lean();
+
+  return {
+    count: results.length,
+    shoes: results.map(formatShoe)
+  };
+};
+
+/**
+ * deleteShoe — soft-delete one shoe by ID (sets isDeleted: true, reversible)
  */
 const deleteShoe = async ({ id }) => {
+  const Shoe = getShoeModel();
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error(`Invalid shoe ID: ${id}`);
+  }
+
+  const shoe = await Shoe.findOneAndUpdate(
+    { _id: id, isDeleted: { $ne: true } },
+    { $set: { isDeleted: true } },
+    { new: true }
+  ).lean();
+
+  if (!shoe) throw new Error(`No shoe found with ID: ${id}`);
+
+  return {
+    message: 'Shoe moved to trash successfully',
+    shoe: formatShoe(shoe)
+  };
+};
+
+/**
+ * hardDeleteShoe — permanently delete one shoe by ID (irreversible)
+ */
+const hardDeleteShoe = async ({ id }) => {
   const Shoe = getShoeModel();
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error(`Invalid shoe ID: ${id}`);
@@ -261,7 +302,7 @@ const deleteShoe = async ({ id }) => {
   if (!deleted) throw new Error(`No shoe found with ID: ${id}`);
 
   return {
-    message: 'Shoe deleted successfully',
+    message: 'Shoe permanently deleted',
     deleted: formatShoe(deleted)
   };
 };
@@ -299,11 +340,13 @@ const TOOL_MAP = {
   getAllShoes,
   getShoeById,
   searchShoes,
+  findShoesByName,
   getInventorySummary,
   createShoe,
   updateShoe,
   bulkUpdateShoes,
   deleteShoe,
+  hardDeleteShoe,
   bulkDeleteShoes
 };
 

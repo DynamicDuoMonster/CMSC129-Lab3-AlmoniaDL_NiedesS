@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '../../api';
 import AdminShoeCard from '../components/AdminShoeCard';
 import AddShoeForm from '../components/AddShoeForm';
@@ -8,6 +8,7 @@ import '../styles/shoeDisplay.css';
 import EditShoeModal from '../components/EditShoeModal';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../components/ConfirmModal';
+import SoleBotWidget from '../components/SoleBotWidget';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -17,17 +18,18 @@ const AdminDashboard = () => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
 
-  useEffect(() => {
-    const fetchShoes = async () => {
-      try {
-        const res = await api.get('/api/shoes');
-        setShoes(res.data);
-      } catch (err) {
-        console.error('Error fetching shoes:', err);
-      }
-    };
-    fetchShoes();
+  const fetchShoes = useCallback(async () => {
+    try {
+      const res = await api.get('/api/shoes');
+      setShoes(res.data);
+    } catch (err) {
+      console.error('Error fetching shoes:', err);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchShoes();
+  }, [fetchShoes]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -98,6 +100,9 @@ const AdminDashboard = () => {
           setPanelOpen(false);
         }} />
       </SidePanel>
+
+      {/* SoleBot floats bottom-right; re-fetches the shoe list after any CRUD op */}
+      <SoleBotWidget onInventoryChange={fetchShoes} />
     </div>
   );
 };
