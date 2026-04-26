@@ -46,7 +46,7 @@ Each shoe in the inventory has:
 - shoe_name: string (e.g., "Air Jordan 1 Retro High OG")
 - brand: string (e.g., "Nike", "Adidas", "New Balance", "Jordan Brand")
 - color: array of strings (e.g., ["Black", "Red"], ["White"])
-- price: number (in USD)
+- price: number (in Pesos)
 - category: string (e.g., "Basketball", "Lifestyle", "Running", "Skate")
 - gender: string (e.g., "Men", "Women", "Unisex", "Kids")
 - imageUrl: array of strings (Cloudinary URLs, may be empty)
@@ -62,13 +62,13 @@ Each shoe in the inventory has:
 User: "Show me all Nike shoes"
 → Call getAllShoes with brand filter "Nike", display results
 
-User: "Which of those are under $150?"
-→ Filter the previously returned Nike list by price < 150
+User: "Which of those are under ₱5000?"
+→ Filter the previously returned Nike list by price < ₱5000
 
 User: "Delete the Air Jordan 1"
 → Call findShoesByName to resolve the name, then call deleteShoe (soft delete — no confirmation needed). Report it's been moved to trash.
 
-User: "Permanently delete all shoes under $50"
+User: "Permanently delete all shoes under ₱2000"
 → DO NOT call hardDelete/bulkDelete yet. Ask for confirmation first.
 
 User: "yes"
@@ -92,8 +92,8 @@ const TOOLS = [
             category:  { type: "STRING", description: "Filter by category (e.g., 'Basketball', 'Lifestyle', 'Running')" },
             gender:    { type: "STRING", description: "Filter by gender: 'Men', 'Women', 'Unisex', or 'Kids'" },
             color:     { type: "STRING", description: "Filter by color (e.g., 'Black', 'White', 'Red')" },
-            maxPrice:  { type: "NUMBER", description: "Maximum price in USD (inclusive)" },
-            minPrice:  { type: "NUMBER", description: "Minimum price in USD (inclusive)" },
+            maxPrice:  { type: "NUMBER", description: "Maximum price in Pesos (inclusive)" },
+            minPrice:  { type: "NUMBER", description: "Minimum price in Pesos (inclusive)" },
             sortBy:    { type: "STRING", description: "Sort field: 'price', 'shoe_name', 'brand'" },
             sortOrder: { type: "STRING", description: "Sort direction: 'asc' or 'desc'" },
             limit:     { type: "NUMBER", description: "Maximum number of results to return (default 20)" }
@@ -101,6 +101,7 @@ const TOOLS = [
           required: []
         }
       },
+
       {
         name: "getShoeById",
         description: "Fetch full details for one specific shoe by its ID.",
@@ -142,9 +143,9 @@ const TOOLS = [
             shoe_name: { type: "STRING", description: "Full shoe name (e.g., 'Air Jordan 1 Retro High OG')" },
             brand:     { type: "STRING", description: "Brand name (e.g., 'Nike', 'Adidas')" },
             color:     { type: "STRING", description: "Primary color (e.g., 'Black', 'White/Red')" },
-            price:     { type: "NUMBER", description: "Price in USD" },
-            category:  { type: "STRING", description: "Category (Basketball, Lifestyle, Running, Skate, etc.)" },
-            gender:    { type: "STRING", description: "Gender: Men, Women, Unisex, or Kids" },
+            price:     { type: "NUMBER", description: "Price in Pesos" },
+            category:  { type: "STRING", description: "Category (Basketball, Lifestyle)" },
+            gender:    { type: "STRING", description: "Gender: Men, Women" },
             imageUrl:  { type: "STRING", description: "Optional image URL" }
           },
           required: ["shoe_name", "brand", "color", "price"]
