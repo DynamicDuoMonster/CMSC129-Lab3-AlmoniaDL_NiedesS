@@ -9,12 +9,14 @@ import EditShoeModal from '../components/EditShoeModal';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../components/ConfirmModal';
 import SoleBotWidget from '../components/SoleBotWidget';
+import AdminSearchBar from '../components/AdminSearchBar'; // ← new
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [editShoe, setEditShoe] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [shoes, setShoes] = useState(null);
+  const [filteredShoes, setFilteredShoes] = useState(null); // ← new
   const [panelOpen, setPanelOpen] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
 
@@ -22,6 +24,7 @@ const AdminDashboard = () => {
     try {
       const res = await api.get('/api/shoes');
       setShoes(res.data);
+      setFilteredShoes(res.data); // keep filtered in sync on fresh fetch
     } catch (err) {
       console.error('Error fetching shoes:', err);
     }
@@ -42,7 +45,9 @@ const AdminDashboard = () => {
   };
 
   const handleEditSuccess = (updatedShoe) => {
-    setShoes(shoes.map(s => s._id === updatedShoe._id ? updatedShoe : s));
+    const updated = shoes.map(s => s._id === updatedShoe._id ? updatedShoe : s);
+    setShoes(updated);
+    setFilteredShoes(updated);
     setEditModalOpen(false);
   };
 
@@ -53,7 +58,9 @@ const AdminDashboard = () => {
   const confirmDelete = async () => {
     try {
       await api.delete(`/api/shoes/${confirmId}/soft`);
-      setShoes(shoes.filter(shoe => shoe._id !== confirmId));
+      const remaining = shoes.filter(shoe => shoe._id !== confirmId);
+      setShoes(remaining);
+      setFilteredShoes(remaining);
     } catch (err) {
       console.error('Error deleting shoe:', err);
     } finally {
@@ -65,6 +72,10 @@ const AdminDashboard = () => {
     <div className="admin-dashboard">
       <div className="dashboard-header">
         <h2>All Products</h2>
+
+        {/* ── Search bar ── */}
+        <AdminSearchBar shoes={shoes || []} onResults={setFilteredShoes} />
+
         <div className="header-actions">
           <button className="trash-btn" onClick={() => navigate('/trash')}>🗑 Trash</button>
           <button className="add-btn" onClick={() => setPanelOpen(true)}>+ Add Shoe</button>
@@ -73,7 +84,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="shoes">
-        {shoes && shoes.map((shoe) => (
+        {filteredShoes && filteredShoes.map((shoe) => (
           <AdminShoeCard key={shoe._id} shoe={shoe} onDelete={handleDelete} onEdit={handleEdit} />
         ))}
       </div>
@@ -96,12 +107,13 @@ const AdminDashboard = () => {
 
       <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} title="Add New Shoe">
         <AddShoeForm onSuccess={(newShoe) => {
-          setShoes([...shoes, newShoe]);
+          const updated = [...shoes, newShoe];
+          setShoes(updated);
+          setFilteredShoes(updated);
           setPanelOpen(false);
         }} />
       </SidePanel>
 
-      {/* SoleBot floats bottom-right; re-fetches the shoe list after any CRUD op */}
       <SoleBotWidget onInventoryChange={fetchShoes} />
     </div>
   );
