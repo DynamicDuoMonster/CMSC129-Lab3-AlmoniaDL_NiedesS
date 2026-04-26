@@ -199,7 +199,7 @@ cd ../client && npm install
 
 ```bash
 # Start backend (from /server)
-npm run dev
+nodemon server.js
 
 # Start frontend (from /client)
 npm start
